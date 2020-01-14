@@ -130,3 +130,9 @@ dmypy.json
 
 # Pycharm project files
 .idea/
+
+# Config files
+*.cfg
+
+fetch_member_records/*.csv
+fetch_member_records/*.xml
