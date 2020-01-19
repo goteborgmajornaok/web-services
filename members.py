@@ -1,9 +1,13 @@
 import json
+from io import StringIO, BytesIO
 import definitions
 from eventor_request_handler import eventor_request
 import xml.etree.cElementTree as ET
 import csv
 import datetime
+from flask import Flask, make_response
+
+app = Flask(__name__)
 
 config = definitions.get_config()
 
@@ -20,9 +24,6 @@ def find_value(path: list, person: ET.Element):
         return element.text
 
     values = [value for key, value in element.attrib.items() if key in path[1]]
-
-    if len(values) == 1 and values[0].isdigit():
-        return '="{}"'.format(values[0])
 
     return ', '.join(values)
 
@@ -43,21 +44,40 @@ def fetch_members():
     return ET.fromstring(xml_str)
 
 
-def xml_to_csv(root: ET, outfile: str):
+def write_members_csv(f: StringIO):
+    f.write(u'\uFEFF')
+    cw = csv.writer(f, quoting=csv.QUOTE_ALL)
+
     parse_settings_file = definitions.ROOT_DIR + '\\' + config['FetchMemberRecords']['parse_settings_file']
     with open(parse_settings_file, encoding='utf-8') as f:
         columns_dict = json.load(f)
 
-    with open(outfile, encoding='utf-8', mode='w', newline='') as f:
-        f.write(u'\ufeff')
-        csv_writer = csv.writer(f, delimiter=',')
+    root = fetch_members()
 
-        csv_writer.writerow(columns_dict.keys())
+    cw.writerow(columns_dict.keys())
 
-        for person in root:
-            person_info = extract_info(columns_dict, person)
-            csv_writer.writerow(person_info.values())
+    for person in root:
+        person_info = extract_info(columns_dict, person)
+        cw.writerow(person_info.values())
 
 
-datetime_str = datetime.datetime.now().strftime('%Y-%m-%d')
-xml_to_csv(fetch_members(), '{} Matrikel GMOK.csv'.format(datetime_str))
+def get_file_name():
+    datetime_str = datetime.datetime.now().strftime('%Y-%m-%d')
+    return config['FetchMemberRecords']['output_file_name'].format(datetime_str)
+
+
+@app.route('/members/get')
+def get():
+    f = StringIO()
+    write_members_csv(f)
+    filename = get_file_name()
+
+    output = make_response(f.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=" + filename
+    output.headers["Content-type"] = "text/csv; charset=utf-8"
+
+    return output
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

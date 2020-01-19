@@ -134,5 +134,5 @@ dmypy.json
 # Config files
 *.cfg
 
-fetch_member_records/*.csv
-fetch_member_records/*.xml
+*.csv
+*.xml
