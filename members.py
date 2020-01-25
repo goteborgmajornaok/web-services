@@ -38,7 +38,7 @@ def extract_info(columns_dict: dict, person: ET.Element):
 
 def fetch_members():
     organisation_id = config['EventorApi']['organisation_id']
-    method = config['FetchMemberRecords']['api_method'].format(organisation_id)
+    method = config['Members']['eventor_api_method'].format(organisation_id)
     xml_str = eventor_request(method, {'includeContactDetails': True})
     return ET.fromstring(xml_str)
 
@@ -68,7 +68,7 @@ def get_file_name():
 @members_app.route('/members')
 def members():
     if request.headers.get('ApiKey') != config['ApiSettings']['apikey']:
-        return config['ApiSettings']['apikey']
+        return config['Errors']['wrong_api_key']
 
     f = StringIO()
     write_members_csv(f)

@@ -4,21 +4,21 @@ import definitions
 config = definitions.get_config()
 
 
-def eventor_request(method: str, queries: dict):
+def eventor_request(method: str, params: dict = None, headers: dict = None):
     eventor_api_settings = config['EventorApi']
-    api_key = eventor_api_settings['apikey']
     url = eventor_api_settings['base_url'] + method
 
-    if len(queries) > 0:
+    if params is not None and len(params) > 0:
         url += '?'
-
-    for key in queries.keys():
-        url += key + '=' + str(queries[key]) + '&'
-
-    url = url[:-1]
+        for key in params.keys():
+            url += key + '=' + str(params[key]) + '&'
+        url = url[:-1]
 
     req = url_req.Request(url)
+    req.add_header('ApiKey', eventor_api_settings['apikey'])
 
-    req.add_header('ApiKey', api_key)
+    if headers is not None and len(headers) > 0:
+        for header, value in headers.items():
+            req.add_header(header, value)
 
     return url_req.urlopen(req).read().decode('utf-8')
