@@ -1,11 +1,11 @@
 import json
-from io import StringIO, BytesIO
+from io import StringIO
 import definitions
 from eventor_request_handler import eventor_request
 import xml.etree.cElementTree as ET
 import csv
 import datetime
-from flask import Flask, make_response
+from flask import Flask, make_response, request
 
 app = Flask(__name__)
 
@@ -66,8 +66,11 @@ def get_file_name():
     return config['FetchMemberRecords']['output_file_name'].format(datetime_str)
 
 
-@app.route('/members/get')
-def get():
+@app.route('/members')
+def members():
+    if request.headers.get('ApiKey') != config['ApiSettings']['apikey']:
+        return config['ApiSettings']['apikey']
+
     f = StringIO()
     write_members_csv(f)
     filename = get_file_name()
