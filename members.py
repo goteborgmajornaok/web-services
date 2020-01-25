@@ -5,10 +5,9 @@ from eventor_request_handler import eventor_request
 import xml.etree.cElementTree as ET
 import csv
 import datetime
-from flask import Flask, make_response, request
+from flask import Blueprint, make_response, request
 
-app = Flask(__name__)
-
+members_app = Blueprint('members', __name__)
 config = definitions.get_config()
 
 
@@ -66,7 +65,7 @@ def get_file_name():
     return config['FetchMemberRecords']['output_file_name'].format(datetime_str)
 
 
-@app.route('/members')
+@members_app.route('/members')
 def members():
     if request.headers.get('ApiKey') != config['ApiSettings']['apikey']:
         return config['ApiSettings']['apikey']
@@ -80,7 +79,3 @@ def members():
     output.headers["Content-type"] = "text/csv; charset=utf-8"
 
     return output
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
