@@ -1,6 +1,6 @@
 from flask import Flask
 from members import members_app
-from create_user import create_user_app
+from user import create_user_app
 
 main_app = Flask(__name__)
 main_app.register_blueprint(members_app)

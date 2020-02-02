@@ -3,6 +3,7 @@ from io import StringIO
 from urllib.error import HTTPError
 
 import definitions
+from eventor_parser import extract_info
 from eventor_request_handler import eventor_request
 import xml.etree.cElementTree as ET
 import csv
@@ -11,31 +12,6 @@ from flask import Blueprint, make_response, request
 
 members_app = Blueprint('members', __name__)
 config = definitions.get_config()
-
-
-def find_value(path: list, person: ET.Element):
-    element = person
-    element_path = path[0]
-    for child in element_path:
-        element = element.find(child)
-        if element is None:
-            return ''
-
-    if len(path) == 1:
-        return element.text
-
-    values = [value for key, value in element.attrib.items() if key in path[1]]
-
-    return ', '.join(values)
-
-
-def extract_info(columns_dict: dict, person: ET.Element):
-    person_info_dict = {column: '' for column in columns_dict.keys()}
-
-    for column, path in columns_dict.items():
-        person_info_dict[column] = find_value(path, person)
-
-    return person_info_dict
 
 
 def fetch_members():
