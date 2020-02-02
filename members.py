@@ -10,6 +10,8 @@ import csv
 import datetime
 from flask import Blueprint, make_response, request
 
+from eventor_validate import validate
+
 members_app = Blueprint('members', __name__)
 config = definitions.get_config()
 
@@ -45,6 +47,12 @@ def get_file_name():
 
 @members_app.route('/members')
 def members():
+    eventor_user = request.headers.get('EventorUsername')
+    eventor_password = request.headers.get('EventorPassword')
+    valid_user, _ = validate(eventor_user, eventor_password)
+    if not valid_user:
+        return config['Errors']['unauthorized']
+
     if request.headers.get('ApiKey') != config['ApiSettings']['apikey']:
         return config['Errors']['wrong_api_key']
 

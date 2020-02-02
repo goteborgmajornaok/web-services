@@ -28,7 +28,7 @@ def post_user():
     eventor_password = request.headers.get('EventorPassword')
     valid_user, eventor_dict = validate(eventor_user, eventor_password)
     if not valid_user:
-        return config['Errors']['user_cannot_be_created']
+        return config['Errors']['unauthorized']
 
     query_params = {'username': request.args.get('Username'),
                     'password': request.args.get('Password'),
