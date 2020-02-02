@@ -1,5 +1,6 @@
 from urllib.error import HTTPError
 import definitions
+from db_handler import check_eventor_id
 from eventor_parser import find_value
 from eventor_request_handler import eventor_request
 import xml.etree.cElementTree as ET
@@ -15,13 +16,7 @@ def person_in_organisation(person_info, organisation_id: int):
 
 def person_has_account(person_info):
     person_id = int(person_info.find('PersonId').text)
-
-    conn = sqlite3.connect('gmok-utils.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(ID) FROM USERS WHERE EVENTOR_PERSON_ID == ?", (person_id,))
-    records = cursor.fetchall()
-
-    return records[0][0] > 0
+    return check_eventor_id(person_id)
 
 
 def validate(eventor_user, eventor_password):
@@ -38,6 +33,8 @@ def validate(eventor_user, eventor_password):
 
     person_info = ET.fromstring(person_info_str)
     valid = person_in_organisation(person_info, organisation_id) and not person_has_account(person_info)
+
     first_name = find_value([["PersonName", "Given"]], person_info)
     last_name = find_value([["PersonName", "Family"]], person_info)
-    return valid, first_name, last_name
+    id = find_value([["PersonId"]], person_info)
+    return valid, {'first_name': first_name, 'last_name': last_name, 'id': id}
