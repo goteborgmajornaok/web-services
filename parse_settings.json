@@ -1,6 +1,7 @@
-{"Efternamn": [["PersonName", "Family"]],
-                        "Förnamn": [["PersonName", "Given"]],
-                        "Födelsedatum": [["BirthDate", "Date"]],
-                        "Telefon": [["Tele"], ["phoneNumber", "mobilePhoneNumber"]],
-                        "Email": [["Tele"], ["mailAddress"]]
-                        }
+{
+"Efternamn": {"path":[["PersonName", "Family"]]},
+ "Förnamn": {"path":[["PersonName", "Given"]]},
+ "Födelseår": {"path": [["BirthDate", "Date"]], "length":"4"},
+ "Telefon": {"path":[["Tele"], ["phoneNumber", "mobilePhoneNumber"]]},
+ "Email": {"path":[["Tele"], ["mailAddress"]]}
+}

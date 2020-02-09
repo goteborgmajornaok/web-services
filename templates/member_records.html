@@ -1,0 +1,108 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Skapa användare för gmok.se</title>
+    <link rel="stylesheet" media="screen" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<div class="container-fluid" style="min-height:100%;padding: 0; background-image: url('/static/zebra.jpg');">
+    <div style="background: #fff; padding: 20px 0px;">
+        <div class="container">
+            <br>
+            <h2>
+                Hämta ***REMOVED***suppgifter
+            </h2>
+            <p>
+                Här kan du som är ***REMOVED*** i Göteborg-Majorna OK hämta kontaktuppgifter för alla klubbens ***REMOVED***mar. Du
+                verifierar ditt ***REMOVED***skap i klubben genom att ange inloggningsuppgifter till Eventor.
+            </p>
+            <br/>
+        </div>
+    </div>
+
+    <form action="" method="post" role="form" novalidate>
+        {{ form.csrf_token }}
+        <div style="background: #052234; padding: 20px 0px; color:#fff;">
+            <div class="container">
+                <h3>Ange inloggningsuppgifter för Eventor</h3>
+
+                <br/>
+                <div class="form-group row">
+                    {{ form.username.label(class_="col-sm-2 col-form-label") }}
+                    <div class="col-sm-6">
+                        {% if form.username.errors %}
+                        {{ form.username(class_="form-control is-invalid") }}
+                        {% else %}
+                        {{ form.username(class_="form-control") }}
+                        {% endif %}
+
+                    </div>
+                    <div class="col-sm-4">
+                        {% if form.username.errors %}
+                        <small class="text-danger">
+                            {% for error in form.username.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+
+
+                <div class="form-group row">
+                    {{ form.password.label(class_="col-sm-2 col-form-label") }}
+                    <div class="col-sm-6">
+                        {% if form.password.errors %}
+                        {{ form.password(class_="form-control is-invalid") }}
+                        {% else %}
+                        {{ form.password(class_="form-control") }}
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-4">
+                        {% if form.password.errors %}
+                        <small class="text-danger">
+                            {% for error in form.password.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-2"></div>
+                    <div class="col-sm-2">
+                        {{ form.submit(class_="btn btn-success") }}
+                    </div>
+                    <div class="col-sm-4" style="text-align: right;">
+                        <small>
+                            <a href="https://eventor.orientering.se/Home/ForgotPassword" target="_blank">
+                                Jag har glömt mina inloggningsuppgifter
+                            </a>
+                        </small>
+                    </div>
+                    <div class="col-sm-2">
+                        <img src="static/EventorLogo.png" style="max-width: 200px;"/>
+                    </div>
+                </div>
+
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <br/>
+                {% for message in messages %}
+                <div class="alert alert-danger">
+                    {{ message }}
+                </div>
+
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
+
+        </div>
+    </form>
+</div>
+</body>
+</html>

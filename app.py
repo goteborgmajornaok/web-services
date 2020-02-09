@@ -1,6 +1,6 @@
 from flask import Flask
 from members import members_app
-from user import create_user_app
+from create_user import create_user_app
 from definitions import get_config
 
 config = get_config()

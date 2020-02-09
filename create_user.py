@@ -1,7 +1,7 @@
 import definitions
 from flask import Blueprint, request, flash, render_template
-from eventor_validate import validate
-from user_form import UserForm
+from user_validation import validate_new_user
+from flask_forms import UserForm
 import wp_user_handling
 
 create_user_app = Blueprint('wordpress_create_user', __name__)
@@ -9,7 +9,7 @@ config = definitions.get_config()
 
 
 def post_user(eventor_user, eventor_password, email, username, password):
-    valid_user, return_info = validate(eventor_user, eventor_password)
+    valid_user, return_info = validate_new_user(eventor_user, eventor_password)
     if not valid_user:
         return False, (return_info, 'eventor')
 
@@ -31,4 +31,4 @@ def user():
             else:
                 flash(message[0], category=message[1])
 
-    return render_template('create_form.html', form=form)
+    return render_template('create_user_form.html', form=form)

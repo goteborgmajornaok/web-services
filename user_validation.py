@@ -7,6 +7,8 @@ import xml.etree.cElementTree as ET
 
 config = definitions.get_config()
 
+organisation_id = int(config['EventorApi']['organisation_id'])
+
 
 def person_in_organisation(person_info, organisation_id: int):
     return person_info.find('OrganisationId') is not None and int(
@@ -18,12 +20,21 @@ def person_has_account(person_info):
     return check_eventor_id(person_id)
 
 
-def validate(eventor_user, eventor_password):
-    organisation_id = int(config['EventorApi']['organisation_id'])
+def validate_existing(eventor_user, eventor_password):
+    try:
+        person_info_str = eventor_request(config['User']['authenticate_method'],
+                                          headers={'Username': eventor_user, 'Password': eventor_password})
+    except HTTPError:
+        return False, config['Errors']['eventor_fail']
 
-    if eventor_user is None or eventor_password is None:
-        return config['Errors']['user_missing']
+    person_info = ET.fromstring(person_info_str)
+    if not person_in_organisation(person_info, organisation_id):
+        return False, config['Errors']['not_in_club']
 
+    return True, ''
+
+
+def validate_new_user(eventor_user, eventor_password):
     try:
         person_info_str = eventor_request(config['User']['authenticate_method'],
                                           headers={'Username': eventor_user, 'Password': eventor_password})
