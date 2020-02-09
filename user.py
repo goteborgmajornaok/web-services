@@ -3,8 +3,9 @@ import requests
 
 import db_handler
 import definitions
-from flask import Blueprint, request
+from flask import Blueprint, request, flash, render_template
 from eventor_validate import validate
+from user_form import UserForm
 
 create_user_app = Blueprint('wordpress_create_user', __name__)
 config = definitions.get_config()
@@ -22,29 +23,42 @@ def create_wp_user(query_params):
     return requests.post(url=api_endpoint, data=json.dumps(query_params), headers=headers)
 
 
-@create_user_app.route('/user', methods=['POST'])
-def post_user():
-    eventor_user = request.headers.get('EventorUsername')
-    eventor_password = request.headers.get('EventorPassword')
-    valid_user, eventor_dict = validate(eventor_user, eventor_password)
+def post_user(eventor_user, eventor_password, email, username, password):
+    valid_user, var = validate(eventor_user, eventor_password)
     if not valid_user:
-        return config['Errors']['unauthorized']
+        return False, var
 
-    query_params = {'username': request.args.get('Username'),
-                    'password': request.args.get('Password'),
-                    'first_name': eventor_dict['first_name'],
-                    'last_name': eventor_dict['last_name'],
-                    'name': eventor_dict['first_name'] + ' ' + eventor_dict['last_name'],
-                    'email': request.args.get('Email')
+    query_params = {'username': username,
+                    'password': password,
+                    'first_name': var['first_name'],
+                    'last_name': var['last_name'],
+                    'name': var['first_name'] + ' ' + var['last_name'],
+                    'email': email
                     }
 
     r = create_wp_user(query_params)
 
-    if not r.status_code == 201:
-        return config['Errors']['failed_create_user']
+    if r.status_code == 201:
+        wp_dict = json.loads(r.text)
+        db_handler.save_user(var['id'], wp_dict['id'])
 
-    wp_dict = json.loads(r.text)
-    db_handler.save_user(eventor_dict['id'], wp_dict['id'])
+        return True, config['Messages']['created_user'].format(wp_dict['name'], wp_dict['username'],
+                                                               config['Wordpress']['login_url'])
+    else:
+        return False, config['Errors']['failed_create_user']
 
-    return config['Messages']['created_user'].format(wp_dict['name'], wp_dict['username'],
-                                                     config['Wordpress']['login_url'])
+
+@create_user_app.route('/user', methods=['GET', 'POST'])
+def user():
+    form = UserForm(request.form)
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            success, message = post_user(form.eventor_user.data, form.eventor_password.data, form.email.data,
+                                         form.username.data, form.password.data)
+            if success:
+                render_template('success.html')
+            else:
+                flash(message)
+
+    return render_template('create_form.html', form=form)

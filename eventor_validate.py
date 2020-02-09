@@ -4,7 +4,6 @@ from db_handler import check_eventor_id
 from eventor_parser import find_value
 from eventor_request_handler import eventor_request
 import xml.etree.cElementTree as ET
-import sqlite3
 
 config = definitions.get_config()
 
@@ -26,15 +25,19 @@ def validate(eventor_user, eventor_password):
         return config['Errors']['user_missing']
 
     try:
-        person_info_str = eventor_request(config['User']['eventor_api_method'],
+        person_info_str = eventor_request(config['User']['authenticate_method'],
                                           headers={'Username': eventor_user, 'Password': eventor_password})
     except HTTPError:
-        return config['Errors']['eventor_validate_fail']
+        return False, config['Errors']['eventor_validate_fail']
 
     person_info = ET.fromstring(person_info_str)
-    valid = person_in_organisation(person_info, organisation_id) and not person_has_account(person_info)
+    if not person_in_organisation(person_info, organisation_id):
+        return False, config['Errors']['not_in_club']
+
+    if person_has_account(person_info):
+        return False, config['Errors']['already_registered']
 
     first_name = find_value([["PersonName", "Given"]], person_info)
     last_name = find_value([["PersonName", "Family"]], person_info)
     id = find_value([["PersonId"]], person_info)
-    return valid, {'first_name': first_name, 'last_name': last_name, 'id': id}
+    return True, {'first_name': first_name, 'last_name': last_name, 'id': id}

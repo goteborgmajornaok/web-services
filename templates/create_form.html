@@ -1,0 +1,191 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Skapa användare för gmok.se</title>
+    <link rel="stylesheet" media="screen" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<div class="container-fluid" style="min-height:100%;padding: 0; background-image: url('/static/zebra.jpg');">
+    <div style="background: #fff; padding: 20px 0px;">
+        <div class="container">
+            <br>
+            <h2>
+                Skapa användare för gmok.se
+            </h2>
+            <p>
+                Här kan du som är ***REMOVED*** i Göteborg-Majorna OK skapa en användare för gmok.se. Du verifierar ditt
+                ***REMOVED***skap
+                i
+                klubben genom att ange dina inloggningsuppgifter till Eventor.
+            </p>
+            <br/>
+        </div>
+    </div>
+
+    <form action="" method="post" role="form" novalidate>
+        {{ form.csrf_token }}
+        <div style="background: #052234; padding: 20px 0px; color:#fff;">
+            <div class="container">
+                <h3>Ange inloggningsuppgifter för Eventor</h3>
+
+                <br/>
+                <div class="form-group row">
+                    {{ form.eventor_user.label(class_="col-sm-2 col-form-label") }}
+                    <div class="col-sm-6">
+                        {% if form.eventor_user.errors %}
+                        {{ form.eventor_user(class_="form-control is-invalid") }}
+                        {% else %}
+                        {{ form.eventor_user(class_="form-control") }}
+                        {% endif %}
+
+                    </div>
+                    <div class="col-sm-4">
+                        {% if form.eventor_user.errors %}
+                        <small class="text-danger">
+                            {% for error in form.eventor_user.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+
+
+                <div class="form-group row">
+                    {{ form.eventor_password.label(class_="col-sm-2 col-form-label") }}
+                    <div class="col-sm-6">
+                        {% if form.eventor_password.errors %}
+                        {{ form.eventor_password(class_="form-control is-invalid") }}
+                        {% else %}
+                        {{ form.eventor_password(class_="form-control") }}
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-4">
+                        {% if form.eventor_password.errors %}
+                        <small class="text-danger">
+                            {% for error in form.eventor_password.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-8"></div>
+                    <div class="col-sm-2">
+                        <img src="static/EventorLogo.png" style="max-width: 200px;"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container" style="color: white;">
+            <br/>
+            <h3>Välj inloggningsuppgifter för gmok.se</h3>
+            <br/>
+            <div class="form-group row">
+                {{ form.email.label(class_="col-sm-2 col-form-label")}}
+                <div class="col-sm-6">
+                    {% if form.eventor_user.errors %}
+                    {{ form.email(class_="form-control is-invalid") }}
+                    {% else %}
+                    {{ form.email(class_="form-control") }}
+                    {% endif %}
+                </div>
+                <div class="col-sm-4">
+                    {% if form.email.errors %}
+                    <small class="text-danger">
+                        {% for error in form.email.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <div class="form-group row">
+                {{ form.username.label(class_="col-sm-2 col-form-label") }}
+                <div class="col-sm-6">
+                    {% if form.username.errors %}
+                    {{ form.username(class_="form-control is-invalid") }}
+                    {% else %}
+                    {{ form.username(class_="form-control") }}
+                    {% endif %}
+                </div>
+                <div class="col-sm-4">
+                    {% if form.username.errors %}
+                    <small class="text-danger">
+                        {% for error in form.username.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group row">
+                {{ form.password.label(class_="col-sm-2 col-form-label") }}
+                <div class="col-sm-6">
+                    {% if form.password.errors %}
+                    {{ form.password(class_="form-control is-invalid") }}
+                    {% else %}
+                    {{ form.password(class_="form-control") }}
+                    {% endif %}
+                </div>
+                <div class="col-sm-4">
+                    {% if form.password.errors %}
+                    <small class="text-danger">
+                        {% for error in form.password.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group row">
+                {{ form.confirm_password.label(class_="col-sm-2 col-form-label") }}
+                <div class="col-sm-6">
+                    {% if form.confirm_password.errors %}
+                    {{ form.confirm_password(class_="form-control is-invalid") }}
+                    {% else %}
+                    {{ form.confirm_password(class_="form-control") }}
+                    {% endif %}
+                </div>
+                <div class="col-sm-4">
+                    {% if form.confirm_password.errors %}
+                    <small class="text-danger">
+                        {% for error in form.confirm_password.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-6">
+                    {{ form.submit(class_="btn btn-success") }}
+                </div>
+            </div>
+            <br/>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-danger">
+                {{ message[1] }}
+            </div>
+
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+
+        </div>
+    </form>
+</div>
+</body>
+</html>
