@@ -74,12 +74,30 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-sm-8"></div>
+                    <div class="col-sm-8" style="vertical-align: center;">
+                        <small>
+                            <a href="https://eventor.orientering.se/Home/ForgotPassword" target="_blank">
+                                Jag har glömt mina inloggningsuppgifter
+                            </a>
+                        </small>
+                    </div>
                     <div class="col-sm-2">
                         <img src="static/EventorLogo.png" style="max-width: 200px;"/>
                     </div>
                 </div>
+                {% with messages = get_flashed_messages(category_filter=["eventor"]) %}
+                {% if messages %}
+                <br/>
+                {% for message in messages %}
+                <div class="alert alert-danger">
+                    {{ message }}
+                </div>
+
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
             </div>
+
         </div>
         <div class="container" style="color: white;">
             <br/>
@@ -172,11 +190,11 @@
                 </div>
             </div>
             <br/>
-            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% with messages = get_flashed_messages(category_filter=["wordpress"]) %}
             {% if messages %}
             {% for message in messages %}
             <div class="alert alert-danger">
-                {{ message[1] }}
+                {{ message }}
             </div>
 
             {% endfor %}

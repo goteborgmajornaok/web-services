@@ -1,5 +1,5 @@
 from wtforms import Form, validators, StringField, PasswordField, SubmitField
-from wtforms.validators import EqualTo, Email, DataRequired
+from wtforms.validators import EqualTo, Email, DataRequired, Length
 from flask_wtf import FlaskForm
 
 
@@ -13,9 +13,10 @@ class UserForm(FlaskForm):
                         [Email(message='Ange giltig mailadress'), DataRequired(message='Ange en email-adress')],
                         render_kw={'placeholder': 'Ange email (kan användas till max 1 användare på gmok.se)'})
     username = StringField('Användarnamn',
-                           [DataRequired(message='Välj ett lösenord')],
+                           [DataRequired(message='Välj ett användarnamn')],
                            render_kw={'placeholder': 'Välj användarnamn (kan ej ändras senare)'})
-    password = PasswordField('Lösenord', [DataRequired(message='Välj ett användarnamn')],
+    password = PasswordField('Lösenord', [DataRequired(message='Välj ett lösenord'),
+                                          Length(min=8, max=100, message='Lösenordet måste innehålla minst 8 tecken')],
                              render_kw={'placeholder': 'Välj lösenord'})
     confirm_password = PasswordField('Upprepa lösenord', [EqualTo('password', message='Lösenorden matchar inte')],
                                      render_kw={'placeholder': 'Upprepa lösenord'})

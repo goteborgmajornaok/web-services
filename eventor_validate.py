@@ -28,7 +28,7 @@ def validate(eventor_user, eventor_password):
         person_info_str = eventor_request(config['User']['authenticate_method'],
                                           headers={'Username': eventor_user, 'Password': eventor_password})
     except HTTPError:
-        return False, config['Errors']['eventor_validate_fail']
+        return False, config['Errors']['eventor_fail']
 
     person_info = ET.fromstring(person_info_str)
     if not person_in_organisation(person_info, organisation_id):
