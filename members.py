@@ -9,7 +9,7 @@ import csv
 import datetime
 from flask import Blueprint, make_response, request, flash, render_template
 
-from user_validation import validate_existing
+from user_validation import validate_eventor_user
 from flask_forms import EventorForm
 
 members_app = Blueprint('members', __name__)
@@ -65,7 +65,7 @@ def members():
     form = EventorForm(request.form)
 
     if request.method == 'POST' and form.validate_on_submit():
-        valid_user, return_info = validate_existing(form.username.data, form.password.data)
+        valid_user, return_info = validate_eventor_user(form.username.data, form.password.data)
         if valid_user:
             return member_records_response()
 

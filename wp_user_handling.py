@@ -2,8 +2,6 @@ import json
 from urllib.error import HTTPError
 
 import requests
-
-import db_handler
 import definitions
 
 config = definitions.get_config()
@@ -14,7 +12,7 @@ headers = {"content-type": "application/json; charset=UTF-8",
 api_endpoint = config['WordpressApi']['base_url'] + '/users'
 
 
-def get_request(query_params):
+def request_get(query_params):
     try:
         r = requests.get(url=api_endpoint, data=json.dumps(query_params), headers=headers)
     except HTTPError:
@@ -23,29 +21,32 @@ def get_request(query_params):
 
 
 def users_with_attribute(attr, value):
-    success, return_info = get_request({'search': value})
+    success, return_info = request_get({'search': value, 'context': 'edit'})
     if not success:
         return False, return_info
     if len(return_info) > 0:
-        return False, config['Errors']['user_attr_exists'].format(attr, value)
+        for r in return_info:
+            if attr in r.keys() and r[attr] == value:
+                return False, config['Errors']['user_attr_exists'].format(attr, value)
     return True, ''
 
 
-def create_user(eventor_id, email, username, password, first_name, last_name):
+def create_user(eventor_id, email, password, first_name, last_name):
+    eventor_id_unique, _ = users_with_attribute('username', eventor_id)
+    if not eventor_id_unique:
+        return False, config['Errors']['already_registered']
+
     email_unique, return_info = users_with_attribute('email', email)
     if not email_unique:
         return False, return_info
 
-    username_unique, return_info = users_with_attribute('användarnamn', username)
-    if not username_unique:
-        return False, return_info
-
-    query_params = {'username': username,
+    query_params = {'username': eventor_id,
                     'password': password,
                     'first_name': first_name,
                     'last_name': last_name,
                     'name': first_name + ' ' + last_name,
-                    'email': email
+                    'email': email,
+                    'nickname': first_name + ' ' + last_name
                     }
     try:
         r = requests.post(url=api_endpoint, data=json.dumps(query_params), headers=headers)
@@ -54,7 +55,6 @@ def create_user(eventor_id, email, username, password, first_name, last_name):
 
     if r.status_code == 201:
         wp_dict = json.loads(r.text)
-        db_handler.save_user(eventor_id, wp_dict['id'])
 
         return True, config['Messages']['created_user'].format(wp_dict['name'], wp_dict['username'])
     else:
