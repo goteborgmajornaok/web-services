@@ -27,7 +27,7 @@ def write_members_csv(f: StringIO):
     f.write(u'\uFEFF')
     cw = csv.writer(f, quoting=csv.QUOTE_ALL)
 
-    parse_settings_file = definitions.ROOT_DIR + '\\' + config['Member']['parse_settings_file']
+    parse_settings_file = config['Member']['parse_settings_file']
     with open(parse_settings_file, encoding='utf-8') as f:
         columns_dict = json.load(f)
 
