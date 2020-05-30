@@ -10,4 +10,5 @@ urllib3==1.25.8
 cffi==1.14.0
 wheel
 flask-wtf
+email_validator
 
