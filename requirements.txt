@@ -8,7 +8,6 @@ werkzeug==0.16.1
 setuptools
 urllib3==1.25.8
 cffi==1.14.0
-intel-openmp==2020.0
-wheel==0.34.2
+wheel
 flask-wtf
 
