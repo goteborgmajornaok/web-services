@@ -8,4 +8,5 @@ CONFIG = ROOT_DIR + '\\config.cfg'
 def get_config():
     config = configparser.ConfigParser()
     config.read(CONFIG, encoding='utf8')
+    print(config)
     return config
