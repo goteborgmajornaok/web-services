@@ -4,7 +4,7 @@ unicodecsv
 requests
 wtforms
 jinja2==2.11.1
-werkzeug=0.16.1
+werkzeug==0.16.1
 setuptools==45.2.0
 urllib3==1.25.8
 cffi==1.14.0
