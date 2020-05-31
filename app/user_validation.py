@@ -1,7 +1,7 @@
 from urllib.error import HTTPError
-import definitions
-from eventor_parser import find_value
-from eventor_request_handler import eventor_request
+from app import definitions
+from app.eventor_parser import find_value
+from app.eventor_request_handler import eventor_request
 import xml.etree.cElementTree as ET
 
 config = definitions.get_config()

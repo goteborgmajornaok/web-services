@@ -2,7 +2,7 @@ import json
 from urllib.error import HTTPError
 
 import requests
-import definitions
+from app import definitions
 
 config = definitions.get_config()
 

@@ -1,5 +1,5 @@
 import urllib.request as url_req
-import definitions
+from app import definitions
 
 config = definitions.get_config()
 

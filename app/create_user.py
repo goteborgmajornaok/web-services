@@ -1,8 +1,7 @@
-import definitions
+from app import definitions, wp_user_handling
 from flask import Blueprint, request, flash, render_template
-from user_validation import validate_eventor_user
-from flask_forms import UserForm
-import wp_user_handling
+from app.user_validation import validate_eventor_user
+from app.flask_forms import UserForm
 
 create_user_app = Blueprint('wordpress_create_user', __name__)
 config = definitions.get_config()

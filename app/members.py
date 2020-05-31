@@ -1,16 +1,16 @@
 import json
 from io import StringIO
 from urllib.error import HTTPError
-import definitions
-from eventor_parser import extract_info
-from eventor_request_handler import eventor_request
+from app import definitions
+from app.eventor_parser import extract_info
+from app.eventor_request_handler import eventor_request
 import xml.etree.cElementTree as ET
 import csv
 import datetime
 from flask import Blueprint, make_response, request, flash, render_template
 
-from user_validation import validate_eventor_user
-from flask_forms import EventorForm
+from app.user_validation import validate_eventor_user
+from app.flask_forms import EventorForm
 
 members_app = Blueprint('members', __name__)
 config = definitions.get_config()
