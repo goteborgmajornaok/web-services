@@ -5,10 +5,11 @@ from definitions import get_config
 
 config = get_config()
 
-main_app = Flask(__name__)
-main_app.register_blueprint(members_app)
-main_app.register_blueprint(create_user_app)
-main_app.config['SECRET_KEY'] = config['Flask']['secret_key']
+app = Flask(__name__)
+app.config['SECRET_KEY'] = config['Flask']['secret_key']
+app.register_blueprint(members_app)
+app.register_blueprint(create_user_app)
 
-if __name__ == "__main__":
-    main_app.run(debug=True)
+
+#if __name__ == "__main__":
+#    main_app.run(debug=True)
