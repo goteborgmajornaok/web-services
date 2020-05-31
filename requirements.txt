@@ -1,5 +1,5 @@
 pandas
-flask
+flask==1.1.1
 unicodecsv
 requests
 wtforms
