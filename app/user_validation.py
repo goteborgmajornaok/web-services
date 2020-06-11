@@ -1,10 +1,8 @@
-from urllib.error import HTTPError
-from app import definitions
 from app.eventor_parser import find_value
-from app.eventor_request_handler import eventor_request
 import xml.etree.cElementTree as ET
 
-config = definitions.get_config()
+from app.main import config
+from request_handler import eventor_request
 
 organisation_id = int(config['EventorApi']['organisation_id'])
 
@@ -19,17 +17,19 @@ def person_in_organisation(person_info, organisation_id: int):
 
 
 def validate_eventor_user(eventor_user, eventor_password):
-    try:
-        person_info_str = eventor_request(config['User']['authenticate_method'],
-                                          headers={'Username': eventor_user, 'Password': eventor_password})
-    except HTTPError:
-        return False, config['Errors']['eventor_fail']
+    headers = {'Username': eventor_user, 'Password': eventor_password}
+    person_info_str = eventor_request('GET', config['EventorApi']['authenticate_endpoint'],
+                                      headers=headers)
 
     person_info = ET.fromstring(person_info_str)
+    # Check if Eventor user is member of organization
     if not person_in_organisation(person_info, organisation_id):
-        return False, config['Errors']['not_in_club']
+        raise Exception(config['Errors']['not_in_club'], 'eventor')
 
-    first_name = find_value([["PersonName", "Given"]], person_info)
-    last_name = find_value([["PersonName", "Family"]], person_info)
-    id = find_value([["PersonId"]], person_info)
-    return True, {'first_name': first_name, 'last_name': last_name, 'id': id}
+    # Create dict with essential person info
+    person_info_dict = dict()
+    person_info_dict['first_name'] = find_value([["PersonName", "Given"]], person_info)
+    person_info_dict['last_name'] = find_value([["PersonName", "Family"]], person_info)
+    person_info_dict['id'] = find_value([["PersonId"]], person_info)
+
+    return person_info_dict

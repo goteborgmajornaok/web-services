@@ -7,18 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-<div class="container-fluid" style="min-height:100%;padding: 0; background-image: url('static/zebra.jpg');">
+<div class="container-fluid" style="min-height:100%;padding: 0;">
     <div style="background: #fff; padding: 20px 0px;">
         <div class="container">
             <br>
             <h2>
-                Skapa användare för gmok.se
+                Registrera ny användare för gmok.se
             </h2>
             <p>
-                Här kan du som är ***REMOVED*** i Göteborg-Majorna OK skapa en användare för gmok.se. Du verifierar ditt
-                ***REMOVED***skap
-                i
-                klubben genom att ange dina inloggningsuppgifter till Eventor.
+                Här kan du som är ***REMOVED*** i Göteborg-Majorna OK registrera en användare för gmok.se. Du verifierar ditt
+                ***REMOVED***skap i klubben genom att ange dina inloggningsuppgifter till Eventor.
             </p>
             <br/>
         </div>
@@ -26,9 +24,9 @@
 
     <form action="" method="post" role="form" novalidate>
         {{ form.csrf_token }}
-        <div style="background: #052234; padding: 20px 0px; color:#fff;">
+        <div style="padding: 20px 0px; color:#000;">
             <div class="container">
-                <h3>Ange inloggningsuppgifter för Eventor</h3>
+                <h3>1. Ange inloggningsuppgifter för Eventor</h3>
 
                 <br/>
                 <div class="form-group row">
@@ -99,9 +97,9 @@
             </div>
 
         </div>
-        <div class="container" style="color: white;">
+        <div class="container" style="color: #000;">
             <br/>
-            <h3>Välj inloggningsuppgifter för gmok.se</h3>
+            <h3>2. Välj inloggningsuppgifter för gmok.se</h3>
             <br/>
             <div class="form-group row">
                 {{ form.email.label(class_="col-sm-2 col-form-label")}}
@@ -163,6 +161,7 @@
                     {% endif %}
                 </div>
             </div>
+            <h3>3. Skicka</h3>
             <div class="row">
                 <div class="col-sm-2"></div>
                 <div class="col-sm-6">

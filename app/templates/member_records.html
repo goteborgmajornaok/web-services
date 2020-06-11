@@ -7,16 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-<div class="container-fluid" style="min-height:100%;padding: 0; background-image: url('static/zebra.jpg');">
-    <div style="background: #fff; padding: 20px 0px;">
+<div class="container-fluid" style="min-height:100%;padding: 0;">
+    <div style="padding: 20px 0px;">
         <div class="container">
-            <br>
-            <h2>
-                Hämta ***REMOVED***suppgifter
-            </h2>
             <p>
-                Här kan du som är ***REMOVED*** i Göteborg-Majorna OK hämta kontaktuppgifter för alla klubbens ***REMOVED***mar. Du
-                verifierar ditt ***REMOVED***skap i klubben genom att ange inloggningsuppgifter till Eventor.
+                Aktuell version av matrikeln, med uppgifter till alla klubbens ***REMOVED***mar, laddas ner som csv-fil.
+                Kontaktuppgifter hämtas från Eventor. Du behöver ange din inloggning till Eventor i formuläret nedan för
+                att kunna ladda ned matrikeln.
             </p>
             <br/>
         </div>
@@ -24,7 +21,7 @@
 
     <form action="" method="post" role="form" novalidate>
         {{ form.csrf_token }}
-        <div style="background: #052234; padding: 20px 0px; color:#fff;">
+        <div style="padding: 20px 0px; color:#000;">
             <div class="container">
                 <h3>Ange inloggningsuppgifter för Eventor</h3>
 

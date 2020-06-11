@@ -9,7 +9,7 @@ class EventorForm(FlaskForm):
                                'placeholder': 'Personummer (ååmmdd-xxxx) eller IdrottOnline-inlogg (IIDXXXXXXX)'})
     password = PasswordField('Lösenord', [DataRequired(message='Ange lösenord')],
                              render_kw={'placeholder': 'Lösenord Eventor/IdrottOnline'})
-    submit = SubmitField('Hämta ***REMOVED***suppgifter')
+    submit = SubmitField('Hämta matrikel')
 
 
 class UserForm(FlaskForm):
@@ -26,4 +26,4 @@ class UserForm(FlaskForm):
                              render_kw={'placeholder': 'Välj lösenord'})
     confirm_password = PasswordField('Upprepa lösenord', [EqualTo('password', message='Lösenorden matchar inte')],
                                      render_kw={'placeholder': 'Upprepa lösenord'})
-    submit = SubmitField('Skapa användare')
+    submit = SubmitField('Registrera ny användare')

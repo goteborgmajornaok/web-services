@@ -1,25 +1,26 @@
 import json
 from io import StringIO
 from urllib.error import HTTPError
-from app import definitions
 from app.eventor_parser import extract_info
-from app.eventor_request_handler import eventor_request
 import xml.etree.cElementTree as ET
 import csv
 import datetime
 from flask import Blueprint, make_response, request, flash, render_template
 
+from app.main import config
 from app.user_validation import validate_eventor_user
 from app.flask_forms import EventorForm
+from request_handler import eventor_request
 
 members_app = Blueprint('members', __name__)
-config = definitions.get_config()
 
 
 def fetch_members():
-    organisation_id = config['EventorApi']['organisation_id']
-    method = config['Member']['eventor_api_method'].format(organisation_id)
-    xml_str = eventor_request(method, {'includeContactDetails': True})
+    api_endpoint = config['EventorApi']['members_endpoint']
+    query_params = {'includeContactDetails': 'true'}
+    headers = {'ApiKey': config['EventorApi']['apikey']}
+    xml_str = eventor_request('GET', api_endpoint, query_params=query_params, headers=headers)
+
     return ET.fromstring(xml_str)
 
 
@@ -65,10 +66,10 @@ def members():
     form = EventorForm(request.form)
 
     if request.method == 'POST' and form.validate_on_submit():
-        valid_user, return_info = validate_eventor_user(form.username.data, form.password.data)
-        if valid_user:
+        try:
+            _ = validate_eventor_user(form.username.data, form.password.data)
             return member_records_response()
-
-        flash(return_info)
+        except Exception as e:
+            flash(e.args[0], category=e.args[1])
 
     return render_template('member_records.html', form=form)
