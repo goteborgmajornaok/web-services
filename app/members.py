@@ -1,6 +1,8 @@
 import json
 from io import StringIO
-from urllib.error import HTTPError
+
+from requests import HTTPError
+
 from app.eventor_parser import extract_info
 import xml.etree.cElementTree as ET
 import csv
@@ -10,7 +12,7 @@ from flask import Blueprint, make_response, request, flash, render_template
 from app.main import config
 from app.user_validation import validate_eventor_user
 from app.flask_forms import EventorForm
-from request_handler import eventor_request
+from app.request_handler import eventor_request
 
 members_app = Blueprint('members', __name__)
 

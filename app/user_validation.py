@@ -2,7 +2,7 @@ from app.eventor_parser import find_value
 import xml.etree.cElementTree as ET
 
 from app.main import config
-from request_handler import eventor_request
+from app.request_handler import eventor_request
 
 organisation_id = int(config['EventorApi']['organisation_id'])
 

@@ -1,5 +1,5 @@
 from app.main import config
-from request_handler import wordpress_request
+from app.request_handler import wordpress_request
 
 
 def get_token():
