@@ -6,7 +6,7 @@ from flask_wtf import FlaskForm
 class EventorForm(FlaskForm):
     username = StringField('Användarnamn', [DataRequired(message='Ange användarnamn')],
                            render_kw={
-                               'placeholder': 'Personummer (ååmmdd-xxxx) eller IdrottOnline-inlogg (IIDXXXXXXX)'})
+                               'placeholder': 'Personnummer (ååmmdd-xxxx) eller IdrottOnline-inlogg (IIDXXXXXXX)'})
     password = PasswordField('Lösenord', [DataRequired(message='Ange lösenord')],
                              render_kw={'placeholder': 'Lösenord Eventor/IdrottOnline'})
     submit = SubmitField('Hämta matrikel')

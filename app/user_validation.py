@@ -16,6 +16,15 @@ def person_in_organisation(person_info, organisation_id: int):
     return False
 
 
+def get_membership(person_info):
+    organisation_id = person_info.find('OrganisationId')
+    if organisation_id is None:
+        raise Exception('An unexpected error occured', 'eventor')
+    if organisation_id.text == config['EventorApi']['organisation_id']:
+        return '***REMOVED***'
+    return 'tranings***REMOVED***'
+
+
 def validate_eventor_user(eventor_user, eventor_password):
     headers = {'Username': eventor_user, 'Password': eventor_password}
     person_info_str = eventor_request('GET', config['EventorApi']['authenticate_endpoint'],
@@ -27,9 +36,10 @@ def validate_eventor_user(eventor_user, eventor_password):
         raise Exception(config['Errors']['not_in_club'], 'eventor')
 
     # Create dict with essential person info
-    person_info_dict = dict()
-    person_info_dict['first_name'] = find_value([["PersonName", "Given"]], person_info)
-    person_info_dict['last_name'] = find_value([["PersonName", "Family"]], person_info)
-    person_info_dict['id'] = find_value([["PersonId"]], person_info)
+    eventor_info_dict = dict()
+    eventor_info_dict['first_name'] = find_value([["PersonName", "Given"]], person_info)
+    eventor_info_dict['last_name'] = find_value([["PersonName", "Family"]], person_info)
+    eventor_info_dict['id'] = find_value([["PersonId"]], person_info)
+    eventor_info_dict['membership'] = get_membership(person_info)
 
-    return person_info_dict
+    return eventor_info_dict

@@ -38,7 +38,7 @@ def check_user(eventor_id, email):
         raise Exception(config['Errors']['user_attr_exists'].format('email', email), 'wordpress')
 
 
-def create_user(eventor_id, email, password, first_name, last_name):
+def create_user(eventor_id, email, password, first_name, last_name, role):
     api_endpoint = config['WordpressApi']['user_endpoint']
     query_params = {'username': eventor_id,
                     'password': password,
@@ -46,7 +46,8 @@ def create_user(eventor_id, email, password, first_name, last_name):
                     'last_name': last_name,
                     'name': first_name + ' ' + last_name,
                     'email': email,
-                    'nickname': first_name + ' ' + last_name
+                    'nickname': first_name + ' ' + last_name,
+                    'roles': role
                     }
     headers = get_headers()
     wordpress_request('POST', api_endpoint, query_params, headers)

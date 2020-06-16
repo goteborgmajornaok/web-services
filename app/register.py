@@ -34,7 +34,8 @@ def register():
                 password = form.password.data
                 # Create Wordpress user
                 wordpress_handling.create_user(eventor_profile['id'], email, password,
-                                               eventor_profile['first_name'], eventor_profile['last_name'])
+                                               eventor_profile['first_name'], eventor_profile['last_name'],
+                                               eventor_profile['membership'])
 
                 message = create_message(eventor_profile['first_name'], eventor_profile['last_name'],
                                          eventor_profile['id'])
