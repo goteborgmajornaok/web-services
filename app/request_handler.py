@@ -1,9 +1,7 @@
-import json
-
 import requests
 from requests import HTTPError
 
-from app.main import config
+from definitions import config
 
 
 def api_request(method, api_endpoint, error_message, error_category, query_params=None, headers=None):
@@ -21,12 +19,3 @@ def api_request(method, api_endpoint, error_message, error_category, query_param
 
     r.encoding = 'utf-8'
     return r.text
-
-
-def wordpress_request(method, api_endpoint, query_params=None, headers=None):
-    response = api_request(method, api_endpoint, config['Errors']['wp_fail'], 'wordpress', query_params, headers)
-    return json.loads(response)
-
-
-def eventor_request(method, api_endpoint, query_params=None, headers=None):
-    return api_request(method, api_endpoint, config['Errors']['eventor_fail'], 'eventor', query_params, headers)

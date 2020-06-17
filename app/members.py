@@ -1,29 +1,16 @@
 import json
 from io import StringIO
-
 from requests import HTTPError
 
-from app.eventor_parser import extract_info
-import xml.etree.cElementTree as ET
 import csv
 import datetime
 from flask import Blueprint, make_response, request, flash, render_template
 
-from app.main import config
-from app.user_validation import validate_eventor_user
+from app.eventor_utils import validate_eventor_user, fetch_members, extract_info
 from app.flask_forms import EventorForm
-from app.request_handler import eventor_request
+from definitions import config
 
 members_app = Blueprint('members', __name__)
-
-
-def fetch_members():
-    api_endpoint = config['EventorApi']['members_endpoint']
-    query_params = {'includeContactDetails': 'true'}
-    headers = {'ApiKey': config['EventorApi']['apikey']}
-    xml_str = eventor_request('GET', api_endpoint, query_params=query_params, headers=headers)
-
-    return ET.fromstring(xml_str)
 
 
 def write_members_csv(f: StringIO):

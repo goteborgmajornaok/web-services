@@ -1,5 +1,12 @@
-from app.main import config
-from app.request_handler import wordpress_request
+import json
+
+from app.request_handler import api_request
+from definitions import config
+
+
+def wordpress_request(method, api_endpoint, query_params=None, headers=None):
+    response = api_request(method, api_endpoint, config['Errors']['wp_fail'], 'wordpress', query_params, headers)
+    return json.loads(response)
 
 
 def get_token():
@@ -51,3 +58,18 @@ def create_user(eventor_id, email, password, first_name, last_name, role):
                     }
     headers = get_headers()
     wordpress_request('POST', api_endpoint, query_params, headers)
+
+
+def get_users(role=None):
+    api_endpoint = config['WordpressApi']['user_endpoint']
+    headers = get_headers()
+    query_params = None
+    if role is not None:
+        query_params = {'roles' : role}
+    return wordpress_request('GET', api_endpoint, query_params, headers)
+
+
+def update_user(id, query_params):
+    api_endpoint = config['WordpressApi']['user_endpoint'] + '/' + id
+    headers = get_headers()
+    return wordpress_request('POST', api_endpoint, query_params, headers)

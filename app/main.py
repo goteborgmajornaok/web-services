@@ -1,10 +1,8 @@
 from flask import Flask
-from app.definitions import get_config
-
-config = get_config()
 
 from app.members import members_app
 from app.register import create_user_app
+from definitions import config
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = config['Flask']['secret_key']

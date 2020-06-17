@@ -1,9 +1,9 @@
-from app import wordpress_handling
+from app import wordpress_utils
 from flask import Blueprint, request, flash, render_template
 
-from app.main import config
-from app.user_validation import validate_eventor_user
+from app.eventor_utils import validate_eventor_user
 from app.flask_forms import UserForm
+from definitions import config
 
 create_user_app = Blueprint('wordpress_create_user', __name__)
 
@@ -29,13 +29,13 @@ def register():
                 email = form.email.data
                 # Check Wordpress user
                 # Throw exception if user already have Wordpress account
-                wordpress_handling.check_user(eventor_profile['id'], email)
+                wordpress_utils.check_user(eventor_profile['id'], email)
 
                 password = form.password.data
                 # Create Wordpress user
-                wordpress_handling.create_user(eventor_profile['id'], email, password,
-                                               eventor_profile['first_name'], eventor_profile['last_name'],
-                                               eventor_profile['membership'])
+                wordpress_utils.create_user(eventor_profile['id'], email, password,
+                                            eventor_profile['first_name'], eventor_profile['last_name'],
+                                            eventor_profile['membership'])
 
                 message = create_message(eventor_profile['first_name'], eventor_profile['last_name'],
                                          eventor_profile['id'])

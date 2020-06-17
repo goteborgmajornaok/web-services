@@ -1,0 +1,52 @@
+from app.members import fetch_members
+from app.eventor_utils import get_membership, find_value
+from app.wordpress_utils import get_users, update_user
+from definitions import config
+
+reserved_users = config['Wordpress']['reserved_users'].split(',')
+member_role = config['Wordpress']['member']
+guest_member_role = config['Wordpress']['guest_member']
+inactive_member_role = config['Wordpress']['inactive_member']
+
+
+def deactivate_user(user_id):
+    update_user(user_id, {'roles': inactive_member_role})
+
+
+def get_membership_dict():
+    members = fetch_members()
+    members_dict = dict()
+    for m in members:
+        id = find_value([["PersonId"]], m)
+        membership = get_membership(m)
+        members_dict[id] = membership
+    return members_dict
+
+
+def update_users_of_role(role, membership_dict, inactive_action=None):
+    users = get_users(role)
+    for user in users:
+        if user['slug'] in reserved_users:
+            continue
+
+        username = user['slug']
+        if username in membership_dict.keys():
+            # Check if membership is changed
+            if membership_dict[username] != role:
+                # Update user with new role
+                update_user(str(user['id']), {'roles': membership_dict[username]})
+        else:
+            # User not member anymore, deactivate user
+            if inactive_action is not None:
+                inactive_action(str(user['id']))
+
+
+def user_inventory():
+    membership_dict = get_membership_dict()
+
+    # Activate inactive users that are registered members again
+    update_users_of_role(inactive_member_role, membership_dict)
+    # Change role or deactivate members
+    update_users_of_role(member_role, membership_dict, deactivate_user)
+    # Change role or deactivate guest members
+    update_users_of_role(guest_member_role, membership_dict, deactivate_user)
