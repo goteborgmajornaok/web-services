@@ -1,6 +1,3 @@
-import json
-from io import StringIO
-
 from requests import HTTPError
 
 import datetime

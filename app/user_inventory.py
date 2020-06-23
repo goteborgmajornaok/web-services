@@ -1,5 +1,4 @@
-from app.members import fetch_members
-from app.eventor_utils import get_membership, find_value
+from app.eventor_utils import get_membership, find_value, fetch_members
 from app.wordpress_utils import get_users, update_user
 from definitions import config
 
