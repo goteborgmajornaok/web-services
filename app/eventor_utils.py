@@ -1,3 +1,4 @@
+import json
 import xml.etree.cElementTree as ET
 
 from app.request_handler import api_request
@@ -80,3 +81,20 @@ def validate_eventor_user(eventor_user, eventor_password):
     eventor_info_dict['membership'] = get_membership(person_info)
 
     return eventor_info_dict
+
+
+def get_members_matrix():
+    parse_settings_file = config['Member']['parse_settings_file']
+    with open(parse_settings_file, encoding='utf-8') as f:
+        columns_dict = json.load(f)
+
+    # Fetch XML with current members
+    root = fetch_members()
+
+    array = [list(columns_dict.keys())]
+
+    for i, person in enumerate(root):
+        person_info = extract_info(columns_dict, person)
+        array.append(list(person_info.values()))
+
+    return array

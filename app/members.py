@@ -1,33 +1,17 @@
 import json
 from io import StringIO
+
 from requests import HTTPError
 
-import csv
 import datetime
-from flask import Blueprint, make_response, request, flash, render_template
+from flask import Blueprint, request, flash, render_template
+import flask_excel as excel
 
-from app.eventor_utils import validate_eventor_user, fetch_members, extract_info
+from app.eventor_utils import validate_eventor_user, get_members_matrix
 from app.flask_forms import EventorForm
 from definitions import config
 
 members_app = Blueprint('members', __name__)
-
-
-def write_members_csv(f: StringIO):
-    f.write(u'\uFEFF')
-    cw = csv.writer(f, quoting=csv.QUOTE_ALL)
-
-    parse_settings_file = config['Member']['parse_settings_file']
-    with open(parse_settings_file, encoding='utf-8') as f:
-        columns_dict = json.load(f)
-
-    root = fetch_members()
-
-    cw.writerow(columns_dict.keys())
-
-    for person in root:
-        person_info = extract_info(columns_dict, person)
-        cw.writerow(person_info.values())
 
 
 def get_file_name():
@@ -36,18 +20,15 @@ def get_file_name():
 
 
 def member_records_response():
-    f = StringIO()
     try:
-        write_members_csv(f)
+        members_matrix = get_members_matrix()
     except HTTPError:
-        return config['Errors']['eventor_fail']
-
+        raise Exception(config['Errors']['eventor_fail'], 'eventor')
     filename = get_file_name()
-
-    output = make_response(f.getvalue())
-    output.headers["Content-Disposition"] = "attachment; filename=" + filename
-    output.headers["Content-type"] = "text/csv; charset=utf-8"
-    return output
+    try:
+        return excel.make_response_from_array(members_matrix, "xls", file_name=filename)
+    except IOError:
+        raise Exception(config['Errors']['io_error'], 'eventor')
 
 
 @members_app.route('/members', methods=['GET', 'POST'])
@@ -56,7 +37,8 @@ def members():
 
     if request.method == 'POST' and form.validate_on_submit():
         try:
-            _ = validate_eventor_user(form.username.data, form.password.data)
+            # validate user
+            validate_eventor_user(form.username.data, form.password.data)
             return member_records_response()
         except Exception as e:
             flash(e.args[0], category=e.args[1])

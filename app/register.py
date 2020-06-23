@@ -40,7 +40,7 @@ def register():
                 message = create_message(eventor_profile['first_name'], eventor_profile['last_name'],
                                          eventor_profile['id'])
 
-                return render_template('success.html', message=message)
+                return render_template('register_success.html', message=message)
             except Exception as e:
                 flash(e.args[0], category=e.args[1])
 
