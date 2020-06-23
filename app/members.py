@@ -1,8 +1,8 @@
+from io import BytesIO
 from requests import HTTPError
-
+import pyexcel as pe
 import datetime
-from flask import Blueprint, request, flash, render_template
-import flask_excel as excel
+from flask import Blueprint, request, flash, render_template, make_response, Response, send_file
 
 from app.eventor_utils import validate_eventor_user, get_members_matrix
 from app.flask_forms import EventorForm
@@ -21,10 +21,19 @@ def member_records_response():
         members_matrix = get_members_matrix()
     except HTTPError:
         raise Exception(config['Errors']['eventor_fail'], 'eventor')
+
+    try:
+        io = BytesIO()
+        sheet = pe.Sheet(members_matrix)
+        io = sheet.save_to_memory("xls", io)
+    except Exception:
+        raise Exception(config['Errors']['file_creation_error'], 'eventor')
+
     filename = get_file_name()
     try:
-        response = excel.make_response_from_array(members_matrix, "xls", file_name=filename)
-        return response
+        output = make_response(io.getvalue())
+        output.headers["Content-Disposition"] = "attachment; filename=" + filename + '.xls'
+        return output
     except IOError:
         raise Exception(config['Errors']['io_error'], 'eventor')
 

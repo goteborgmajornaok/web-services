@@ -5,7 +5,6 @@ click==7.1.2
 dnspython==1.16.0
 email-validator==1.1.1
 Flask==1.1.2
-Flask-Excel==0.0.7
 Flask-WTF==0.14.3
 gunicorn==20.0.4
 idna==2.9
@@ -15,9 +14,7 @@ lml==0.0.9
 MarkupSafe==1.1.1
 pyexcel==0.6.2
 pyexcel-io==0.5.20
-pyexcel-webio==0.1.4
 pyexcel-xls==0.5.8
-pytz==2020.1
 requests==2.23.0
 six==1.15.0
 texttable==1.6.2
