@@ -26,9 +26,7 @@ def member_records_response():
         raise Exception(config['Errors']['eventor_fail'], 'eventor')
     filename = get_file_name()
     try:
-        print(members_matrix)
         response = excel.make_response_from_array(members_matrix, "xls", file_name=filename)
-        print(response)
         return response
     except IOError:
         raise Exception(config['Errors']['io_error'], 'eventor')
