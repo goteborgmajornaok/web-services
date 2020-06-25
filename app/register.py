@@ -1,5 +1,5 @@
 from app import wordpress_utils
-from flask import Blueprint, request, flash, render_template
+from flask import Blueprint, request, flash, render_template, Markup
 
 from app.eventor_utils import validate_eventor_user
 from app.flask_forms import UserForm
@@ -8,9 +8,9 @@ from definitions import config
 create_user_app = Blueprint('wordpress_create_user', __name__)
 
 
-def create_message(first_name, last_name, eventor_id):
+def create_message(first_name, last_name):
     name = first_name + ' ' + last_name
-    return config['Messages']['created_user'].format(name, eventor_id)
+    return config['Messages']['created_user'].format(name)
 
 
 @create_user_app.route('/register', methods=['GET', 'POST'])
@@ -37,11 +37,10 @@ def register():
                                             eventor_profile['first_name'], eventor_profile['last_name'],
                                             eventor_profile['membership'])
 
-                message = create_message(eventor_profile['first_name'], eventor_profile['last_name'],
-                                         eventor_profile['id'])
+                message = create_message(eventor_profile['first_name'], eventor_profile['last_name'])
 
                 return render_template('register_success.html', message=message)
             except Exception as e:
-                flash(e.args[0], category=e.args[1])
+                flash(Markup(e.args[0]), category=e.args[1])
 
     return render_template('register_form.html', form=form)

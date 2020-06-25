@@ -4,8 +4,9 @@ from app.request_handler import api_request
 from definitions import config
 
 
-def wordpress_request(method, api_endpoint, query_params=None, headers=None):
-    response = api_request(method, api_endpoint, config['Errors']['wp_fail'], 'wordpress', query_params, headers)
+def wordpress_request(method, api_endpoint, query_params=None, headers=None, success_code=200):
+    response = api_request(method, api_endpoint, config['Errors']['wp_fail'], 'wordpress', query_params, headers,
+                           success_code=success_code)
     return json.loads(response)
 
 
@@ -57,7 +58,7 @@ def create_user(eventor_id, email, password, first_name, last_name, role):
                     'roles': role
                     }
     headers = get_headers()
-    wordpress_request('POST', api_endpoint, query_params, headers)
+    wordpress_request('POST', api_endpoint, query_params, headers, success_code=201)
 
 
 def get_users(role=None):
@@ -65,7 +66,7 @@ def get_users(role=None):
     headers = get_headers()
     query_params = None
     if role is not None:
-        query_params = {'roles' : role}
+        query_params = {'roles': role}
     return wordpress_request('GET', api_endpoint, query_params, headers)
 
 
