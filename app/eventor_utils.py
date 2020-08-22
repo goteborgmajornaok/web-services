@@ -1,5 +1,6 @@
 import json
 import xml.etree.cElementTree as ET
+from datetime import date
 
 from app.request_handler import api_request
 from definitions import config
@@ -7,8 +8,37 @@ from definitions import config
 organisation_id = int(config['EventorApi']['organisation_id'])
 
 
-def eventor_request(method, api_endpoint, query_params=None, headers=None):
+def eventor_request(method, api_endpoint, query_params: dict = None, headers: dict = None):
     return api_request(method, api_endpoint, config['Errors']['eventor_fail'], 'eventor', query_params, headers)
+
+
+def club_activities(start_date: date, end_date: date):
+    query_params = {'from': start_date.strftime('%Y-%m-%d'),
+                    'to': end_date.strftime('%Y-%m-%d'),
+                    'organisationId': organisation_id}
+
+    headers = {'ApiKey': config['EventorApi']['apikey']}
+    xml_str = eventor_request('GET', config['EventorApi']['activities_endpoint'], query_params, headers)
+    return ET.fromstring(xml_str)
+
+
+def events(start_date: date, end_date: date, classification_ids: list, organisations_ids: list):
+    query_params = {'fromDate': start_date.strftime('%Y-%m-%d'),
+                    'toDate': end_date.strftime('%Y-%m-%d'),
+                    'classificationIds': ','.join(map(str, classification_ids)),
+                    'organisationIds': ','.join(map(str, organisations_ids))}
+    print(query_params)
+
+    headers = {'ApiKey': config['EventorApi']['apikey']}
+    xml_str = eventor_request('GET', config['EventorApi']['events_endpoint'], query_params, headers)
+    return ET.fromstring(xml_str)
+
+
+def org_name(id):
+    headers = {'ApiKey': config['EventorApi']['apikey']}
+    xml_str = eventor_request('GET', config['EventorApi']['organisation_endpoint'].format(id), headers=headers)
+    root = ET.fromstring(xml_str)
+    return root.find('Name').text
 
 
 def extract_info(columns_dict: dict, person: ET.Element):
