@@ -1,8 +1,8 @@
-from datetime import date, timedelta
+from datetime import date, timedelta, time
 from io import BytesIO
 
 from dateutil import parser
-
+import pytz
 from flask import Blueprint, make_response
 from icalendar import Calendar, Event, vDatetime
 
@@ -10,6 +10,8 @@ from app import eventor_utils
 from definitions import config
 
 calendarfeeds_app = Blueprint('calendarfeeds', __name__)
+
+timezone = pytz.timezone(config['Time']['timezone'])
 
 
 def add_activities(root, calendar: Calendar):
@@ -21,9 +23,13 @@ def add_activities(root, calendar: Calendar):
             cal_event['summary'] = activity.find('Name').text + ' [KLUBBAKTIVITET]'
 
             starttime = parser.parse(attributes['startTime'])
+            starttime = starttime.astimezone(timezone)
             cal_event['dtstart'] = vDatetime(starttime).to_ical()
 
-            endtime = starttime + timedelta(hours=2)
+            if starttime.time() == time(0,0,0):
+                endtime = starttime + timedelta(days=1)
+            else:
+                endtime = starttime + timedelta(hours=2)
             cal_event['dtend'] = vDatetime(endtime).to_ical()
 
             cal_event['url'] = attributes['url']
@@ -46,18 +52,22 @@ def add_events(root, calendar: Calendar):
             org_id = event.find('Organiser').find('OrganisationId').text
             org_name = eventor_utils.org_name(org_id)
             cal_event['summary'] = '{}, {}'.format(name, org_name)
-            print(cal_event['summary'])
 
             startdate_str = event.find('StartDate').find('Date').text
             starttime_str = event.find('StartDate').find('Clock').text
             startdatetime = parser.parse(startdate_str + ' ' + starttime_str)
+            startdatetime = timezone.localize(startdatetime)
 
             enddate_str = event.find('StartDate').find('Date').text
             endtime_str = event.find('StartDate').find('Clock').text
             enddatetime = parser.parse(enddate_str + ' ' + endtime_str)
+            enddatetime = timezone.localize(enddatetime)
 
             if startdatetime == enddatetime:
-                enddatetime = startdatetime + timedelta(hours=3)
+                if startdatetime.time() == time(0, 0, 0):
+                    enddatetime = startdatetime + timedelta(days=1)
+                else:
+                    enddatetime = startdatetime + timedelta(hours=3)
 
             cal_event['dtstart'] = vDatetime(startdatetime).to_ical()
 
@@ -76,6 +86,9 @@ def add_events(root, calendar: Calendar):
 @calendarfeeds_app.route('/calendarfeed/<int:days_in_advance>', methods=['GET'])
 def calendarfeed(days_in_advance: int):
     calendar = Calendar()
+    calendar['method'] = 'REQUEST'
+    calendar['prodid'] = '-//Svenska Orienteringsförbundet//GMOK'
+    calendar['version'] = '2.0'
 
     start = date.today()
     end = start + timedelta(days=days_in_advance)
@@ -91,7 +104,7 @@ def calendarfeed(days_in_advance: int):
     io.write(calendar.to_ical())
     try:
         response = make_response(io.getvalue())
-        response.headers["Content-Disposition"] = "attachment; filename=calendar.ics"
+        response.headers["Content-Disposition"] = "attachment; filename=Events.ics"
         return response
     except IOError:
         raise Exception(config['Errors']['io_error'], 'eventor')

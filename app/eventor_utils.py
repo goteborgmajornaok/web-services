@@ -27,7 +27,6 @@ def events(start_date: date, end_date: date, classification_ids: list, organisat
                     'toDate': end_date.strftime('%Y-%m-%d'),
                     'classificationIds': ','.join(map(str, classification_ids)),
                     'organisationIds': ','.join(map(str, organisations_ids))}
-    print(query_params)
 
     headers = {'ApiKey': config['EventorApi']['apikey']}
     xml_str = eventor_request('GET', config['EventorApi']['events_endpoint'], query_params, headers)
