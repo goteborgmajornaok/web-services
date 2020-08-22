@@ -64,7 +64,7 @@ def add_events(root, calendar: Calendar):
             enddatetime = timezone.localize(enddatetime)
 
             if startdatetime == enddatetime:
-                if startdatetime.time() == time(0, 0, 0):
+                if startdatetime.time() == time(0, 0, 0, tzinfo=timezone):
                     enddatetime = startdatetime + timedelta(days=1)
                 else:
                     enddatetime = startdatetime + timedelta(hours=3)
