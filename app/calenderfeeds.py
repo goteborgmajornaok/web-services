@@ -32,6 +32,8 @@ def add_activities(root, calendar: Calendar):
                 endtime = starttime + timedelta(hours=2)
             cal_event['dtend'] = vDatetime(endtime).to_ical()
 
+            cal_event['categories'] = 'EVENTOR'
+
             cal_event['url'] = attributes['url']
 
             cal_event['uid'] = 'Activity_' + attributes['id'] + '@eventor.orientering.se'
@@ -72,6 +74,8 @@ def add_events(root, calendar: Calendar):
             cal_event['dtstart'] = vDatetime(startdatetime).to_ical()
 
             cal_event['dtend'] = vDatetime(enddatetime).to_ical()
+
+            cal_event['categories'] = 'EVENTOR'
 
             cal_event['url'] = 'https://eventor.orientering.se/Events/Show/' + event.find('EventId').text
 
