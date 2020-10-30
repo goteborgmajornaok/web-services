@@ -84,9 +84,7 @@ def add_events(root, calendar: Calendar):
             url = 'https://eventor.orientering.se/Events/Show/' + event.find('EventId').text
             cal_event['url'] = url
 
-            cal_event[
-                'description'] = 'Denna aktivitet är importerad från Eventor, för info se: <a href={}>{}</a>'.format(
-                url, url)
+            cal_event['description'] = 'Denna aktivitet är importerad från Eventor, för info se: {}'.format(url)
 
             cal_event['uid'] = 'Event_' + event.find('EventId').text + '@eventor.orientering.se'
 
