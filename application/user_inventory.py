@@ -1,6 +1,10 @@
+from flask import Blueprint, request, jsonify
+
 from application.eventor_utils import get_membership, find_value, fetch_members
 from application.wordpress_utils import get_users, update_user
 from definitions import config
+
+user_inventory_app = Blueprint('wordpress_user_inventory', __name__)
 
 reserved_users = config['Wordpress']['reserved_users'].split(',')
 member_role = config['Wordpress']['member']
@@ -40,7 +44,12 @@ def update_users_of_role(role, membership_dict, inactive_action=None):
                 inactive_action(str(user['id']))
 
 
+@user_inventory_app.route('/inventory', methods=['POST'])
 def user_inventory():
+    headers = request.headers
+    auth = headers.get("X-Api-Key")
+    if auth != config['ApiSettings']['ApiKey']:
+        return jsonify({"message": "ERROR: Unauthorized"}), 401
     membership_dict = get_membership_dict()
 
     # Activate inactive users that are registered members again
@@ -49,3 +58,5 @@ def user_inventory():
     update_users_of_role(member_role, membership_dict, deactivate_user)
     # Change role or deactivate guest members
     update_users_of_role(guest_member_role, membership_dict, deactivate_user)
+
+    return jsonify({"message": "User inventory performed successfully."}), 200
