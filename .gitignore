@@ -134,3 +134,5 @@ dmypy.json
 *.csv
 *.xml
 *.db
+
+scratch.py

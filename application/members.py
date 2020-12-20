@@ -4,8 +4,8 @@ import pyexcel as pe
 import datetime
 from flask import Blueprint, request, flash, render_template, make_response, Response, send_file
 
-from app.eventor_utils import validate_eventor_user, get_members_matrix
-from app.flask_forms import EventorForm
+from application.eventor_utils import validate_eventor_user, get_members_matrix
+from application.flask_forms import EventorForm
 from definitions import config
 
 members_app = Blueprint('members', __name__)

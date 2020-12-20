@@ -2,7 +2,7 @@ import json
 import xml.etree.cElementTree as ET
 from datetime import date
 
-from app.request_handler import api_request
+from application.request_handler import api_request
 from definitions import config
 
 organisation_id = int(config['EventorApi']['organisation_id'])

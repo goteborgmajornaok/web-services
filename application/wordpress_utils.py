@@ -1,6 +1,6 @@
 import json
 
-from app.request_handler import api_request
+from application.request_handler import api_request
 from definitions import config
 
 

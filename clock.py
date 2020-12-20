@@ -1,6 +1,6 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-from app.user_inventory import user_inventory
+from application.user_inventory import user_inventory
 
 sched = BlockingScheduler()
 

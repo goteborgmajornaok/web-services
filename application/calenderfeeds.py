@@ -6,7 +6,7 @@ import pytz
 from flask import Blueprint, make_response
 from icalendar import Calendar, Event, vDatetime
 
-from app import eventor_utils
+from application import eventor_utils
 from definitions import config
 
 calendarfeeds_app = Blueprint('calendarfeeds', __name__)

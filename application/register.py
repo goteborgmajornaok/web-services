@@ -1,8 +1,8 @@
-from app import wordpress_utils
+from application import wordpress_utils
 from flask import Blueprint, request, flash, render_template, Markup
 
-from app.eventor_utils import validate_eventor_user
-from app.flask_forms import UserForm
+from application.eventor_utils import validate_eventor_user
+from application.flask_forms import UserForm
 from definitions import config
 
 create_user_app = Blueprint('wordpress_create_user', __name__)
