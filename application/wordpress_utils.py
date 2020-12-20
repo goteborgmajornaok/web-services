@@ -1,4 +1,5 @@
 import json
+import base64
 
 from application.request_handler import api_request
 from definitions import config
@@ -10,18 +11,11 @@ def wordpress_request(method, api_endpoint, query_params=None, headers=None, suc
     return json.loads(response)
 
 
-def get_token():
-    api_endpoint = config['WordpressApi']['token_endpoint']
-    query_params = {'username': config['WordpressApi']['username'],
-                    'password': config['WordpressApi']['password']}
-    headers = {"content-type": "application/json; charset=UTF-8"}
-
-    content = wordpress_request('POST', api_endpoint, query_params, headers)
-    return content['token']
-
-
 def get_headers():
-    return {"content-type": "application/json; charset=UTF-8", 'Authorization': 'Bearer ' + get_token()}
+    auth_str = '{}:{}'.format(config['WordpressApi']['username'], config['WordpressApi']['password'])
+    base64_bytes = base64.b64encode(auth_str.encode('ascii'))
+    base64_str = base64_bytes.decode('ascii')
+    return {"content-type": "application/json; charset=UTF-8", 'Authorization': 'Basic ' + base64_str}
 
 
 def check_existing_user(attr, value):
