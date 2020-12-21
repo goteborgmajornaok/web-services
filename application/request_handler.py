@@ -4,7 +4,8 @@ from requests import HTTPError
 from definitions import config
 
 
-def api_request(method, api_endpoint, error_message, error_category, query_params=None, headers=None, success_code=200):
+def api_request(method, api_endpoint, error_message, error_category, query_params=None, headers=None,
+                success_codes=(200,)):
     try:
         if method == 'GET':
             r = requests.get(url=api_endpoint, params=query_params, headers=headers)
@@ -12,7 +13,7 @@ def api_request(method, api_endpoint, error_message, error_category, query_param
             r = requests.post(url=api_endpoint, params=query_params, headers=headers)
         else:
             raise Exception(config['Errors']['request_bug'])
-        if r.status_code != success_code:
+        if r.status_code not in success_codes:
             raise HTTPError()
     except HTTPError:
         raise Exception(error_message, error_category)

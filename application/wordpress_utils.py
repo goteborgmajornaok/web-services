@@ -2,20 +2,45 @@ import json
 import base64
 
 from application.request_handler import api_request
-from definitions import config
+from definitions import config, tmp_config, write_tmp
 
 
-def wordpress_request(method, api_endpoint, query_params=None, headers=None, success_code=200):
+def generate_token():
+    api_endpoint = config['WordpressApi']['generate_token_endpoint']
+    query_params = {'username': config['WordpressApi']['username'],
+                    'password': config['WordpressApi']['password']}
+    headers = {"content-type": "application/json; charset=UTF-8"}
+
+    content = wordpress_request('POST', api_endpoint, query_params, headers)
+    return content['token']
+
+
+def validate_token(token):
+    api_endpoint = config['WordpressApi']['validate_token_endpoint']
+    headers = {"content-type": "application/json; charset=UTF-8", 'Authorization': 'Bearer ' + token}
+
+    content = wordpress_request('POST', api_endpoint, None, headers, success_codes=(200, 403))
+    return content['data']['status'] == 200
+
+
+def get_token():
+    latest_token = tmp_config['WordpressApi']['token']
+    if not validate_token(latest_token):
+        new_token = generate_token()
+        tmp_config.set('WordpressApi', 'token', new_token)
+        write_tmp()
+    return tmp_config.get('WordpressApi', 'token')
+
+
+def wordpress_request(method, api_endpoint, query_params=None, headers=None, success_codes=(200,)):
     response = api_request(method, api_endpoint, config['Errors']['wp_fail'], 'wordpress', query_params, headers,
-                           success_code=success_code)
+                           success_codes=success_codes)
     return json.loads(response)
 
 
 def get_headers():
-    auth_str = '{}:{}'.format(config['WordpressApi']['username'], config['WordpressApi']['password'])
-    base64_bytes = base64.b64encode(auth_str.encode('ascii'))
-    base64_str = base64_bytes.decode('ascii')
-    return {"content-type": "application/json; charset=UTF-8", 'Authorization': 'Basic ' + base64_str}
+    token = get_token()
+    return {"content-type": "application/json; charset=UTF-8", 'Authorization': 'Bearer ' + token}
 
 
 def check_existing_user(attr, value):
@@ -52,7 +77,7 @@ def create_user(eventor_id, email, password, first_name, last_name, role):
                     'roles': role
                     }
     headers = get_headers()
-    wordpress_request('POST', api_endpoint, query_params, headers, success_code=201)
+    wordpress_request('POST', api_endpoint, query_params, headers, success_codes=(201,))
 
 
 def get_users(role=None):
