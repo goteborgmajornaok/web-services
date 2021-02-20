@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 
 from application.eventor_utils import get_membership, find_value, fetch_members
 from application.wordpress_utils import get_users, update_user
+from common import check_api_key
 from definitions import config
 
 user_inventory_app = Blueprint('wordpress_user_inventory', __name__)
@@ -46,10 +47,9 @@ def update_users_of_role(role, membership_dict, inactive_action=None):
 
 @user_inventory_app.route('/inventory', methods=['POST'])
 def user_inventory():
-    headers = request.headers
-    auth = headers.get("X-Api-Key")
-    if auth != config['ApiSettings']['ApiKey']:
+    if not check_api_key(request.headers):
         return jsonify({"message": "ERROR: Unauthorized"}), 401
+
     membership_dict = get_membership_dict()
 
     # Activate inactive users that are registered members again

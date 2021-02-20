@@ -135,4 +135,8 @@ dmypy.json
 *.xml
 *.db
 
+*.cgi
+*.ics
+wsgi.py
+
 scratch.py
