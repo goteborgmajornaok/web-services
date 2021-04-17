@@ -80,12 +80,12 @@ def create_user(eventor_id, email, password, first_name, last_name, role):
     wordpress_request('POST', api_endpoint, query_params, headers, success_codes=(201,))
 
 
-def get_users(role=None):
+def get_users(role=None, page=1, per_page=100):
     api_endpoint = config['WordpressApi']['user_endpoint']
     headers = get_headers()
     query_params = None
     if role is not None:
-        query_params = {'roles': role}
+        query_params = {'roles': role, 'page': page, 'per_page': per_page}
     return wordpress_request('GET', api_endpoint, query_params, headers)
 
 

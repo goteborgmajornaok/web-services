@@ -28,21 +28,26 @@ def get_membership_dict():
 
 
 def update_users_of_role(role, membership_dict, inactive_action=None):
-    users = get_users(role)
-    for user in users:
-        if user['slug'] in reserved_users:
-            continue
 
-        username = user['slug']
-        if username in membership_dict.keys():
-            # Check if membership is changed
-            if membership_dict[username] != role:
-                # Update user with new role
-                update_user(str(user['id']), {'roles': membership_dict[username]})
-        else:
-            # User not member anymore, deactivate user
-            if inactive_action is not None:
-                inactive_action(str(user['id']))
+    page = 1
+    users = get_users(role, page=page)
+    while len(users) > 0:
+        for user in users:
+            if user['slug'] in reserved_users:
+                continue
+
+            username = user['slug']
+            if username in membership_dict.keys():
+                # Check if membership is changed
+                if membership_dict[username] != role:
+                    # Update user with new role
+                    update_user(str(user['id']), {'roles': membership_dict[username]})
+            else:
+                # User not member anymore, deactivate user
+                if inactive_action is not None:
+                    inactive_action(str(user['id']))
+        page += 1
+        users = get_users(role, page=page)
 
 
 @user_inventory_app.route('/inventory', methods=['POST'])

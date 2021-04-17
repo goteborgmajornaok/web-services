@@ -71,7 +71,7 @@ def fetch_members():
 
 def get_membership(person_info):
     organisation_id = person_info.find('OrganisationId')
-    if organisation_id is None or organisation_id.text != config['EventorApi']['organisation_id']:
+    if organisation_id is not None and organisation_id.text != config['EventorApi']['organisation_id']:
         return 'tranings***REMOVED***'
     return '***REMOVED***'
 
