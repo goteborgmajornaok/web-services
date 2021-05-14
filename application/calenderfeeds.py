@@ -1,10 +1,13 @@
+import json
 import os
 from datetime import date, timedelta, time
 
+import requests
 from dateutil import parser
 import pytz
 from flask import Blueprint, make_response, request, jsonify
 from icalendar import Calendar, Event, vDatetime
+from icalendar.prop import vCategory, vText
 
 from application import eventor_utils
 from application.request_handler import api_request
@@ -23,6 +26,9 @@ def add_activities(root, calendar: Calendar):
             cal_event = Event()
 
             cal_event['summary'] = '{} [{} anmälda]'.format(activity.find('Name').text, attributes['registrationCount'])
+
+            if 'startTime' not in attributes:
+                continue
 
             starttime = parser.parse(attributes['startTime'])
             starttime = starttime.astimezone(timezone)
@@ -87,9 +93,9 @@ def add_events(root, calendar: Calendar):
             elif startdatetime.date() != enddatetime.date() and enddatetime.time() == time(0, 0, 0, tzinfo=timezone):
                 enddatetime += timedelta(days=1)
 
-            cal_event['dtstart'] = vDatetime(startdatetime).to_ical()
+            cal_event.add('dtstart', startdatetime)
 
-            cal_event['dtend'] = vDatetime(enddatetime).to_ical()
+            cal_event.add('dtend', enddatetime)
 
             classification = config['EventClassification'][str(event.find('EventClassificationId').text)]
             cal_event['categories'] = ','.join(['Eventor', classification])
@@ -105,6 +111,36 @@ def add_events(root, calendar: Calendar):
         except RuntimeError as err:
             print(err)
             continue
+
+
+def add_idrottonline_feeds(calendar: Calendar):
+    with open('idrottonline_feeds.json', "r") as json_file:
+        data = json.load(json_file)
+
+    for feed in data:
+        feed_calendar = Calendar.from_ical(requests.get(feed['url']).text)
+        calendar_name = vText.from_ical(feed_calendar['X-WR-CALNAME'])
+        for component in feed_calendar.subcomponents:
+            if 'categories' in component:
+                old_categories = [vCategory.from_ical(c)[0] for c in component['categories'].cats if
+                                  vCategory.from_ical(c)[0] != '"']
+                new_categories = feed['categories'] + old_categories
+                component['categories'] = ','.join(new_categories)
+            else:
+                component['categories'] = ','.join(feed_calendar['categories'])
+
+            idrottonline_id = vText.from_ical(component['UID']).split('Activity')[1].split('@')[0]
+            url = config['IdrottOnline'][
+                      'activity_base_url'] + '/' + calendar_name + '?calendarEventId=' + idrottonline_id
+            component['url'] = url
+            if 'description' in component:
+                description = vText.from_ical(component['description'])
+                description = description.replace('[', '<').replace(']', '>')
+            else:
+                description = ''
+            component['description'] = description + 'Denna aktivitet är importerad från IdrottOnline, se: {}'.format(
+                url)
+            calendar.add_component(component)
 
 
 def generate_calendarfeed(days_in_advance: int):
@@ -130,6 +166,9 @@ def generate_calendarfeed(days_in_advance: int):
     club_events_root = eventor_utils.events(start, end, config['Calendar']['club_event_class_ids'].split(','),
                                             [config['EventorApi']['organisation_id']])
     add_events(club_events_root, calendar)
+
+    # Add feeds from other webcals
+    add_idrottonline_feeds(calendar)
 
     f = open(config.get('Calendar', 'filename'), 'wb')
     f.write(calendar.to_ical())
