@@ -114,33 +114,37 @@ def add_events(root, calendar: Calendar):
 
 
 def add_idrottonline_feeds(calendar: Calendar):
-    with open('idrottonline_feeds.json', "r") as json_file:
-        data = json.load(json_file)
+    try:
+        with open('idrottonline_feeds.json', "r") as json_file:
+            data = json.load(json_file)
 
-    for feed in data:
-        feed_calendar = Calendar.from_ical(requests.get(feed['url']).text)
-        calendar_name = vText.from_ical(feed_calendar['X-WR-CALNAME'])
-        for component in feed_calendar.subcomponents:
-            if 'categories' in component:
-                old_categories = [vCategory.from_ical(c)[0] for c in component['categories'].cats if
-                                  vCategory.from_ical(c)[0] != '"']
-                new_categories = feed['categories'] + old_categories
-                component['categories'] = ','.join(new_categories)
-            else:
-                component['categories'] = ','.join(feed_calendar['categories'])
+        for feed in data:
+            feed_calendar = Calendar.from_ical(requests.get(feed['url']).text)
+            calendar_name = vText.from_ical(feed_calendar['X-WR-CALNAME'])
+            for component in feed_calendar.subcomponents:
+                if 'categories' in component:
+                    old_categories = [vCategory.from_ical(c)[0] for c in component['categories'].cats if
+                                      vCategory.from_ical(c)[0] != '"']
+                    new_categories = feed['categories'] + old_categories
+                    component['categories'] = ','.join(new_categories)
+                else:
+                    component['categories'] = ','.join(feed_calendar['categories'])
 
-            idrottonline_id = vText.from_ical(component['UID']).split('Activity')[1].split('@')[0]
-            url = config['IdrottOnline'][
-                      'activity_base_url'] + '/' + calendar_name + '?calendarEventId=' + idrottonline_id
-            component['url'] = url
-            if 'description' in component:
-                description = vText.from_ical(component['description'])
-                description = description.replace('[', '<').replace(']', '>')
-            else:
-                description = ''
-            component['description'] = description + 'Denna aktivitet är importerad från IdrottOnline, se: {}'.format(
-                url)
-            calendar.add_component(component)
+                idrottonline_id = vText.from_ical(component['UID']).split('Activity')[1].split('@')[0]
+                url = config['IdrottOnline'][
+                          'activity_base_url'] + '/' + calendar_name + '?calendarEventId=' + idrottonline_id
+                component['url'] = url
+                if 'description' in component:
+                    description = vText.from_ical(component['description'])
+                    description = description.replace('[', '<').replace(']', '>')
+                else:
+                    description = ''
+                component[
+                    'description'] = description + 'Denna aktivitet är importerad från IdrottOnline, se: {}'.format(
+                    url)
+                calendar.add_component(component)
+    except IOError:
+        return
 
 
 def generate_calendarfeed(days_in_advance: int):
