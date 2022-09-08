@@ -48,6 +48,6 @@ def members():
             validate_eventor_user(form.username.data, form.password.data)
             return member_records_response()
         except Exception as e:
-            flash(e.args[0], category=e.args[1])
+            flash(e, category=e.args[1])
 
     return render_template('member_records.html', form=form)
