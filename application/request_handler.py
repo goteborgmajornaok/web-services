@@ -1,3 +1,4 @@
+import logging
 import requests
 from requests import HTTPError
 
@@ -12,11 +13,16 @@ def api_request(method, api_endpoint, error_message, error_category, query_param
         elif method == 'POST':
             r = requests.post(url=api_endpoint, params=query_params, headers=headers)
         else:
+            logging.error('Not implemented API request method')
             raise Exception(config['Errors']['request_bug'])
         if r.status_code not in success_codes:
-            raise HTTPError()
+            logging.error(
+                f'{method} request to {api_endpoint} failed. Status code: {r.status_code}, reason: {r.reason}, text: {r.text}')
+            raise HTTPError(error_message, error_category)
+        else:
+            logging.info(f'{method} request to {api_endpoint} successful. Status code: {r.status_code}')
     except HTTPError:
-        raise Exception(error_message, error_category)
+        raise HTTPError(error_message, error_category)
 
     r.encoding = 'utf-8'
-    return r.text
+    return r

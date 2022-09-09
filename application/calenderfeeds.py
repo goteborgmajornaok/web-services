@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from datetime import date, timedelta, time
 
@@ -51,7 +52,7 @@ def add_activities(root, calendar: Calendar):
 
             calendar.add_component(cal_event)
         except RuntimeError as err:
-            print(err)
+            logging.warning(err)
             continue
 
 
@@ -109,7 +110,7 @@ def add_events(root, calendar: Calendar):
 
             calendar.add_component(cal_event)
         except RuntimeError as err:
-            print(err)
+            logging.warning(err)
             continue
 
 
@@ -143,11 +144,13 @@ def add_idrottonline_feeds(calendar: Calendar):
                     'description'] = description + 'Denna aktivitet är importerad från IdrottOnline, se: {}'.format(
                     url)
                 calendar.add_component(component)
-    except IOError:
+    except IOError as e:
+        logging.info(e)
         return
 
 
 def generate_calendarfeed(days_in_advance: int):
+    logging.info('Trying to create calendar feed')
     calendar = Calendar()
     calendar['method'] = 'REQUEST'
     calendar['prodid'] = '-//Svenska Orienteringsförbundet//GMOK'
@@ -177,12 +180,13 @@ def generate_calendarfeed(days_in_advance: int):
     f = open(config.get('Calendar', 'filename'), 'wb')
     f.write(calendar.to_ical())
     f.close()
+    logging.info('Calendar feed created')
 
     return jsonify({'message': 'Calendarfeed successfully generated for next {} days'.format(days_in_advance)})
 
 
 def overwrite_changed(calendar):
-    target_feed = Calendar.from_ical(api_request('GET', config['Calendar']['target_feed'], '', ''))
+    target_feed = Calendar.from_ical(api_request('GET', config['Calendar']['target_feed'], '', '').text)
 
     target_dict = dict()
     for component in target_feed.subcomponents:
@@ -196,6 +200,7 @@ def overwrite_changed(calendar):
 
 def fetch_calendarfeed():
     if not os.path.exists(config['Calendar']['filename']):
+        logging.warning(f'Calendarfeed file {config["Calendar"]["filename"]} not generated')
         return jsonify({"message": "Calendarfeed not generated"}), 503
 
     latest_ics = ROOT_DIR + '/' + config['Calendar']['filename']
@@ -206,7 +211,8 @@ def fetch_calendarfeed():
         response = make_response(calendar.to_ical())
         response.headers["Content-Disposition"] = "attachment; filename=Events.ics"
         return response
-    except IOError:
+    except IOError as e:
+        logging.error(e)
         raise Exception(config['Errors']['io_error'], 'eventor')
 
 
@@ -214,11 +220,15 @@ def fetch_calendarfeed():
 @calendarfeeds_app.route('/calendarfeed/<int:days_in_advance>', methods=['POST'])
 def calendarfeed(days_in_advance: int = None):
     if request.method == 'POST':
+        logging.info(f'Calendar POST request from {request.remote_addr}')
         if not check_api_key(request.headers):
+            logging.warning('Wrong API key')
             return jsonify({"message": "ERROR: Unauthorized"}), 401
         if isinstance(days_in_advance, int):
             return generate_calendarfeed(days_in_advance)
         else:
+            logging.warning('Days in advance misspecified')
             return jsonify('Specify how many days to generate feed for'), 400
     elif request.method == 'GET':
+        logging.info(f'Calendar GET request from {request.remote_addr}')
         return fetch_calendarfeed()

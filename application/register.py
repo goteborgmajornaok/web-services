@@ -1,3 +1,5 @@
+import logging
+
 from application import wordpress_utils
 from flask import Blueprint, request, flash, render_template, Markup
 
@@ -18,6 +20,7 @@ def register():
     form = UserForm(request.form)
 
     if request.method == 'POST':
+        logging.info(f'Register POST request from {request.remote_addr}')
         if form.validate_on_submit():
             try:
                 eventor_user = form.eventor_user.data
@@ -42,5 +45,7 @@ def register():
                 return render_template('register_success.html', message=message)
             except Exception as e:
                 flash(Markup(e.args[0]), category=e.args[1])
+    else:
+        logging.info(f'Register GET request from {request.remote_addr}')
 
     return render_template('register_form.html', form=form)

@@ -1,3 +1,5 @@
+import logging
+
 from flask import Blueprint, request, jsonify
 
 from application.eventor_utils import get_membership, find_value, fetch_members
@@ -48,10 +50,12 @@ def update_users_of_role(role, membership_dict, inactive_action=None):
                     inactive_action(str(user['id']))
         page += 1
         users = get_users(role, page=page)
+    logging.info(f'Updated Wordpress users of role {role}')
 
 
 @user_inventory_app.route('/inventory', methods=['POST'])
 def user_inventory():
+    logging.info(f'User inventory POST request from {request.remote_addr}')
     if not check_api_key(request.headers):
         return jsonify({"message": "ERROR: Unauthorized"}), 401
 
@@ -63,5 +67,6 @@ def user_inventory():
     update_users_of_role(member_role, membership_dict, deactivate_user)
     # Change role or deactivate guest members
     update_users_of_role(guest_member_role, membership_dict, deactivate_user)
+    logging.info('User inventory completed')
 
     return jsonify({"message": "User inventory performed successfully."}), 200
