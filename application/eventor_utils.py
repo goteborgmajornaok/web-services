@@ -1,15 +1,17 @@
 import json
 import xml.etree.cElementTree as ET
 from datetime import date
+import logging
 
 from application.request_handler import api_request
-from definitions import config
+from definitions import config, ROOT_DIR
 
 organisation_id = int(config['EventorApi']['organisation_id'])
 
 
-def eventor_request(method, api_endpoint, query_params: dict = None, headers: dict = None):
-    return api_request(method, api_endpoint, config['Errors']['eventor_fail'], 'eventor', query_params, headers)
+def eventor_request(method, api_endpoint, query_params: dict = None, headers: dict = None, success_codes=(200,)):
+    return api_request(method, api_endpoint, config['Errors']['eventor_fail'], 'eventor', query_params, headers,
+                       success_codes)
 
 
 def club_activities(start_date: date, end_date: date):
@@ -18,7 +20,8 @@ def club_activities(start_date: date, end_date: date):
                     'organisationId': organisation_id}
 
     headers = {'ApiKey': config['EventorApi']['apikey']}
-    xml_str = eventor_request('GET', config['EventorApi']['activities_endpoint'], query_params, headers)
+    xml_str = eventor_request('GET', config['EventorApi']['activities_endpoint'], query_params, headers).text
+    logging.info(f'Fetched club activities between {start_date} and {end_date}')
     return ET.fromstring(xml_str)
 
 
@@ -29,13 +32,14 @@ def events(start_date: date, end_date: date, classification_ids: list, organisat
                     'organisationIds': ','.join(map(str, organisations_ids))}
 
     headers = {'ApiKey': config['EventorApi']['apikey']}
-    xml_str = eventor_request('GET', config['EventorApi']['events_endpoint'], query_params, headers)
+    xml_str = eventor_request('GET', config['EventorApi']['events_endpoint'], query_params, headers).text
+    logging.info(f'Fetched events between {start_date} and {end_date}')
     return ET.fromstring(xml_str)
 
 
 def org_name(id):
     headers = {'ApiKey': config['EventorApi']['apikey']}
-    xml_str = eventor_request('GET', config['EventorApi']['organisation_endpoint'].format(id), headers=headers)
+    xml_str = eventor_request('GET', config['EventorApi']['organisation_endpoint'].format(id), headers=headers).text
     root = ET.fromstring(xml_str)
     return root.find('Name').text
 
@@ -61,10 +65,11 @@ def person_in_organisation(person_info, organisation_id: int):
 
 
 def fetch_members():
-    api_endpoint = config['EventorApi']['members_endpoint']
+    api_endpoint = config['EventorApi']['members_endpoint'].format(config['EventorApi']['organisation_id'])
     query_params = {'includeContactDetails': 'true'}
     headers = {'ApiKey': config['EventorApi']['apikey']}
-    xml_str = eventor_request('GET', api_endpoint, query_params=query_params, headers=headers)
+    xml_str = eventor_request('GET', api_endpoint, query_params=query_params, headers=headers).text
+    logging.info('Fetched member records from Eventor')
 
     return ET.fromstring(xml_str)
 
@@ -72,8 +77,8 @@ def fetch_members():
 def get_membership(person_info):
     organisation_id = person_info.find('OrganisationId')
     if organisation_id is not None and organisation_id.text != config['EventorApi']['organisation_id']:
-        return 'tranings***REMOVED***'
-    return '***REMOVED***'
+        return config['Wordpress']['guest_member']
+    return config['Wordpress']['member']
 
 
 def find_value(path: list, person: ET.Element):
@@ -94,12 +99,18 @@ def find_value(path: list, person: ET.Element):
 
 def validate_eventor_user(eventor_user, eventor_password):
     headers = {'Username': eventor_user, 'Password': eventor_password}
-    person_info_str = eventor_request('GET', config['EventorApi']['authenticate_endpoint'],
-                                      headers=headers)
+    logging.info(f'Trying validate Eventor user {eventor_user}')
+    request = eventor_request('GET', config['EventorApi']['authenticate_endpoint'],
+                              headers=headers, success_codes=(200, 403))
+    if request.status_code == 403:
+        logging.warning(f'Failed to validate Eventor user {eventor_user}. Full error: {request.text}')
+        raise Exception(config['Errors']['eventor_validation_fail'], 'eventor')
+    logging.info(f'Fetched person info for eventor user {eventor_user}')
 
-    person_info = ET.fromstring(person_info_str)
+    person_info = ET.fromstring(request.text)
     # Check if Eventor user is member of organization
     if not person_in_organisation(person_info, organisation_id):
+        logging.warning(f'Eventor user {eventor_user} not found in organization')
         raise Exception(config['Errors']['not_in_club'], 'eventor')
 
     # Create dict with essential person info
@@ -109,11 +120,13 @@ def validate_eventor_user(eventor_user, eventor_password):
     eventor_info_dict['id'] = find_value([["PersonId"]], person_info)
     eventor_info_dict['membership'] = get_membership(person_info)
 
+    logging.info(f'User with eventor id {eventor_user} validated as {eventor_info_dict["membership"]}')
+
     return eventor_info_dict
 
 
 def get_members_matrix():
-    parse_settings_file = config['Member']['parse_settings_file']
+    parse_settings_file = ROOT_DIR + '/' + config['Member']['parse_settings_file']
     with open(parse_settings_file, encoding='utf-8') as f:
         columns_dict = json.load(f)
 

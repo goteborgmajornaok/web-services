@@ -16,4 +16,4 @@ flaskapp.register_blueprint(user_inventory_app)
 
 @flaskapp.route("/")
 def home_view():
-    return "<h1>Välkommen till GMOK Eventor Utils</h1>"
+    return ""
