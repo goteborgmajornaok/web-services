@@ -3,12 +3,18 @@
 try:
     import os
     import logging
+    import datetime
+    from pathlib import Path
 
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-    logging.basicConfig(filename=ROOT_DIR + '/app.log',
+    log_dir = ROOT_DIR + '/logs/' + datetime.date.today().strftime("%Y/%m")
+
+    Path(log_dir).mkdir(parents=True, exist_ok=True)
+
+    logging.basicConfig(filename=log_dir + '/' + datetime.date.today().strftime("%d") + '.log',
                         filemode='a',
-                        format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                        format='%(asctime)s,%(msecs)d, LEVEL: %(levelname)s, FILE: %(filename)s, FUNCTION: %(funcName)s, LINE: %(lineno)d, %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO)
 
