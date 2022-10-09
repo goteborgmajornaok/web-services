@@ -3,20 +3,24 @@
 try:
     import os
     import logging
+    from logging.handlers import RotatingFileHandler
     import datetime
     from pathlib import Path
 
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-    log_dir = ROOT_DIR + '/logs/' + datetime.date.today().strftime("%Y/%m")
+    log_dir = ROOT_DIR + '/logs/'
 
     Path(log_dir).mkdir(parents=True, exist_ok=True)
 
-    logging.basicConfig(filename=log_dir + '/' + datetime.date.today().strftime("%d") + '.log',
-                        filemode='a',
-                        format='%(asctime)s,%(msecs)d, LEVEL: %(levelname)s, FILE: %(filename)s, FUNCTION: %(funcName)s, LINE: %(lineno)d, %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S',
-                        level=logging.INFO)
+    handler = RotatingFileHandler(filename=log_dir + '/app.log', maxBytes=200 * 1024 * 1024, backupCount=1,
+                                  encoding='UTF-8')
+    formatter = logging.Formatter(
+        '%(asctime)s,%(msecs)d, LEVEL: %(levelname)s, FILE: %(filename)s, FUNCTION: %(funcName)s, LINE: %(lineno)d, %(message)s',
+        '%Y-%m-%d %H:%M:%S')
+    handler.setFormatter(formatter)
+
+    logging.getLogger().addHandler(handler)
+    logging.getLogger().setLevel(logging.INFO)
 
     from wsgiref.handlers import CGIHandler
     from application.main import flaskapp

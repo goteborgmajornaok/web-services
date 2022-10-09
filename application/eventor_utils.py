@@ -3,14 +3,17 @@ import xml.etree.cElementTree as ET
 from datetime import date
 import logging
 
+from cache_to_disk import cache_to_disk
+
 from application.request_handler import api_request
+from common import KnownError
 from definitions import config, ROOT_DIR
 
-organisation_id = int(config['EventorApi']['organisation_id'])
+organisation_id = config.getint('EventorApi', 'organisation_id')
 
 
 def eventor_request(method, api_endpoint, query_params: dict = None, headers: dict = None, success_codes=(200,)):
-    return api_request(method, api_endpoint, config['Errors']['eventor_fail'], 'eventor', query_params, headers,
+    return api_request(method, api_endpoint, config['Messages']['eventor_fail'], 'eventor', query_params, headers,
                        success_codes)
 
 
@@ -29,7 +32,8 @@ def events(start_date: date, end_date: date, classification_ids: list, organisat
     query_params = {'fromDate': start_date.strftime('%Y-%m-%d'),
                     'toDate': end_date.strftime('%Y-%m-%d'),
                     'classificationIds': ','.join(map(str, classification_ids)),
-                    'organisationIds': ','.join(map(str, organisations_ids))}
+                    'organisationIds': ','.join(map(str, organisations_ids))
+                    }
 
     headers = {'ApiKey': config['EventorApi']['apikey']}
     xml_str = eventor_request('GET', config['EventorApi']['events_endpoint'], query_params, headers).text
@@ -37,9 +41,10 @@ def events(start_date: date, end_date: date, classification_ids: list, organisat
     return ET.fromstring(xml_str)
 
 
-def org_name(id):
+@cache_to_disk(100)
+def org_name(org_id: int):
     headers = {'ApiKey': config['EventorApi']['apikey']}
-    xml_str = eventor_request('GET', config['EventorApi']['organisation_endpoint'].format(id), headers=headers).text
+    xml_str = eventor_request('GET', config['EventorApi']['organisation_endpoint'] + '/' + org_id, headers=headers).text
     root = ET.fromstring(xml_str)
     return root.find('Name').text
 
@@ -55,17 +60,17 @@ def extract_info(columns_dict: dict, person: ET.Element):
     return person_info_dict
 
 
-def person_in_organisation(person_info, organisation_id: int):
+def person_in_organisation(person_info, org_id: int):
     roles = person_info.findall('Role')
     for r in roles:
         role_org = r.find('OrganisationId')
-        if role_org is not None and int(role_org.text) == organisation_id:
+        if role_org is not None and int(role_org.text) == org_id:
             return True
     return False
 
 
 def fetch_members():
-    api_endpoint = config['EventorApi']['members_endpoint'].format(config['EventorApi']['organisation_id'])
+    api_endpoint = config['EventorApi']['members_endpoint'] + '/' + config['EventorApi']['organisation_id']
     query_params = {'includeContactDetails': 'true'}
     headers = {'ApiKey': config['EventorApi']['apikey']}
     xml_str = eventor_request('GET', api_endpoint, query_params=query_params, headers=headers).text
@@ -104,14 +109,14 @@ def validate_eventor_user(eventor_user, eventor_password):
                               headers=headers, success_codes=(200, 403))
     if request.status_code == 403:
         logging.warning(f'Failed to validate Eventor user {eventor_user}. Full error: {request.text}')
-        raise Exception(config['Errors']['eventor_validation_fail'], 'eventor')
+        raise KnownError(config['Messages']['eventor_validation_fail'], 'eventor')
     logging.info(f'Fetched person info for eventor user {eventor_user}')
 
     person_info = ET.fromstring(request.text)
     # Check if Eventor user is member of organization
     if not person_in_organisation(person_info, organisation_id):
         logging.warning(f'Eventor user {eventor_user} not found in organization')
-        raise Exception(config['Errors']['not_in_club'], 'eventor')
+        raise KnownError(config['Messages']['not_in_club'], 'eventor')
 
     # Create dict with essential person info
     eventor_info_dict = dict()

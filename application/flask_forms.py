@@ -20,7 +20,7 @@ class UserForm(FlaskForm):
                                      render_kw={'placeholder': 'Lösenord Eventor/IdrottOnline'})
     email = StringField('Email',
                         [Email(message='Ange giltig mailadress'), DataRequired(message='Ange en email-adress')],
-                        render_kw={'placeholder': 'Ange email (kan användas till max 1 användare på gmok.se)'})
+                        render_kw={'placeholder': 'Ange email (kan användas till max 1 användare på {{site}})'})
     password = PasswordField('Lösenord', [DataRequired(message='Välj ett lösenord'),
                                           Length(min=8, max=100, message='Lösenordet måste innehålla minst 8 tecken')],
                              render_kw={'placeholder': 'Välj lösenord'})

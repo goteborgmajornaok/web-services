@@ -1,7 +1,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Skapa användare för gmok.se</title>
+    <title>Skapa användare för {{site}}</title>
     <link rel="stylesheet" media="screen" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,22 +13,33 @@
         <div style="padding: 20px 0px; color:#000;">
             <div class="container">
                 <p>
-                    <a href="https://gmok.se">&#8592; Tillbaka till gmok.se</a>
+                    <a href="https://{{site}}">&#8592; Tillbaka till {{site}}</a>
                 </p>
 
-                <br />
+                <br/>
                 <h3>
-                    Registrera användare på gmok.se
+                    Registrera användare på {{site}}
                 </h3>
                 <p>
-                    Medlemmar och tränings***REMOVED***mar i Göteborg-Majorna OK kan här själva registrera en användare för gmok.se genom att ange inloggningsuppgifter till Eventor/Idrottonline (det är samma inloggning). Om du ännu inte är ***REMOVED***, men vill bli, gå till sidan <a href="https://gmok.se/om/kontakt/">Bli ***REMOVED***.</a>
+                    Medlemmar och träningsmedlemmar i {{organisation}} kan här själva registrera en användare för
+                    {{site}} genom att ange inloggningsuppgifter till Eventor/Idrottonline (det är samma inloggning).
+                    {% if become_member_url != '' %}
+                    Om du ännu inte är medlem, men vill bli, gå till sidan <a href="{{become_member_url}}">Bli
+                    medlem.</a>
+                    {% endif %}
                 </p>
                 <p>
-                    I formuläret nedan anger du både inloggningsuppgifter till Eventor/IdrottOnline och samt email och lösenord för din nya användare på gmok.se. Notera att det behövs en unik mailadress för varje användare på gmok.se.
+                    I formuläret nedan anger du både inloggningsuppgifter till Eventor/IdrottOnline och samt email och
+                    lösenord för din nya användare på {{site}}. Notera att det behövs en unik mailadress för varje
+                    användare på {{site}}.
                 </p>
+                {% if guest_member != '' %}
                 <p>
-                    <b>OBS!</b> För alla fullständiga ***REMOVED***mar (ej tränings***REMOVED***mar) måste Göteborg-Majorna OK vara förvald förening i Eventor. Detta väljer du genom att logga in på Eventor, gå in på Mina sidor -> Personliga inställningar -> Organisationer, och bocka i Göteborg-Majorna OK.
+                    <b>OBS!</b> För alla fullständiga medlemmar (ej träningsmedlemmar) måste {{organisation}} vara
+                    förvald förening i Eventor. Detta väljer du genom att logga in på Eventor, gå in på Mina sidor ->
+                    Personliga inställningar -> Organisationer, och bocka i {{organisation}}.
                 </p>
+                {% endif %}
                 <h5>1. Ange inloggningsuppgifter för Eventor/IdrottOnline</h5>
                 <br/>
                 <div class="form-group row">
@@ -76,7 +87,7 @@
                 <div class="row">
                     <div class="col-sm-8" style="text-align: right;">
                         <small>
-                            <a href="https://eventor.orientering.se/Home/ForgotPassword" target="_blank">
+                            <a href="{{eventor_forgot_password}}" target="_blank">
                                 Jag har glömt mina inloggningsuppgifter
                             </a>
                         </small>
@@ -101,7 +112,7 @@
         </div>
         <div class="container" style="color: #000;">
             <br/>
-            <h5>2. Välj inloggningsuppgifter för gmok.se</h5>
+            <h5>2. Välj inloggningsuppgifter för {{site}}</h5>
             <br/>
             <div class="form-group row">
                 {{ form.email.label(class_="col-sm-2 col-form-label")}}

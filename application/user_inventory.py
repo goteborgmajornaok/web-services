@@ -30,6 +30,8 @@ def get_membership_dict():
 
 
 def update_users_of_role(role, membership_dict, inactive_action=None):
+    if role == '':
+        return
 
     page = 1
     users = get_users(role, page=page)
