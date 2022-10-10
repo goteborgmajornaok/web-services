@@ -46,19 +46,19 @@ Go the parent directory of this repo, rename the repo directory to "cgi-bin" and
 
      python -m http.server --bind localhost --cgi PORT
 
-Then, open a web browser and go to [http://localhost:PORT/cgi-bin/app.py/](). The page will load while required Python
-packages are installed. When finished, you will retrieve a message: "Environment has been reset. Try reloading page.".
-If properly configured, in [config.cfg]() and [idrottonline_feeds.json](idrottonline_feeds.json), the
-application should work. Alternatively, you can turn off all endpoints in [config.cfg]() -> Endpoints (the
-default values) adn you should get a completely white screen at [http://localhost:PORT/cgi-bin/app.py/]() if deployment
-works.
+To test the configuration, turn off all endpoints in [config.cfg](sample_config.cfg) -> Endpoints (
+the default values) and you should get a completely white screen at [http://localhost:PORT/cgi-bin/app.py/]() if
+deployment works. When turning on the endpoints, you may have to reload the page after necessary packages have been
+automatically installed.
 
 For instructions on how to run on Loopia servers, see [https://support.loopia.se/wiki/python/]().
 
 ## Set up
 
-The services are based on connection to Eventor and a Wordpress site. You need to copy [sample_config.cfg]() into a new
-file called [config.cfg](), and set values according to your organisation and preferences. To include activities from
+The services are based on connection to Eventor and a Wordpress site. You need to
+copy [sample_config.cfg](sample_config.cfg) into a new
+file called [config.cfg](sample_config.cfg), and set values according to your organisation and preferences. To include
+activities from
 IdrottOnline, also [idrottonline_feeds.json]() needs to be configured (see [section for calendarfeeds](###calendarfeed))
 .
 
@@ -79,7 +79,7 @@ of your Wordpress site:
     define('SERVICE_API_KEY', 'APIKEY');
     define('CALENDAR_FEED_DAYS', 100);
 
-`APIKEY` should be the key specified in [config.cfg]() -> ApiSettings -> apikey
+`APIKEY` should be the key specified in [config.cfg](sample_config.cfg) -> ApiSettings -> apikey
 
 ### Basic Eventor API configuration
 
@@ -91,14 +91,14 @@ the Wordpress site.
 ### Calendar feed
 
 Calendar feeds can be fetched from Eventor, IdrottOnline, and any other source of ICS feeds. These are merged into
-a single ICS file, saved to "latest_calendar.ics". In [config.cfg](), you need to specify what event
+a single ICS file, saved to "latest_calendar.ics". In [config.cfg](sample_config.cfg), you need to specify what event
 types
 that will be imported from Eventor.
 
 The serivce has been used with [the calendar plugin AI1EC](https://wordpress.org/plugins/all-in-one-event-calendar/),
 which allows regular import of external ICS feeds. Other calendar plugins that allow ICS import should work as well.
 To avoid overwriting of the description of a calendar activity that has been imported and then modified in Wordpress,
-specify "target_feed" in [config.cfg]().
+specify "target_feed" in [config.cfg](sample_config.cfg).
 
 Feeds from IOL must be specified in "idrottonline_feeds.json" on this format:
 
@@ -114,7 +114,7 @@ Feeds from IOL must be specified in "idrottonline_feeds.json" on this format:
     ]
 
 In this example, categories "IdrottOnline" and "Ungdom" will be added to all activities from this URL, when generating
-"latest_calendar.ics". You also need to set "activity_base_url" in [config.cfg]() according to your
+"latest_calendar.ics". You also need to set "activity_base_url" in [config.cfg](sample_config.cfg) according to your
 club's
 URL.
 
@@ -145,13 +145,13 @@ After adding these lines, you can set up the cron job using WP Crontrol (hook na
 ### Registration
 
 At the Wordpress site, you need to set up a user handling member registration requests. Recommended is to delimit its
-capabilities to only create/edit users. Specify email and password for this user in [config.cfg]() ->
+capabilities to only create/edit users. Specify email and password for this user in [config.cfg](sample_config.cfg) ->
 WordpressAPI -> username, password. Also ensure that EventorAPI -> ApiKey, organisation_id & district_id are correct.
 
 The file [parse_settings.json](parse_settings.json) specifies how member information will be retrived from Eventor's
 API. Unless the XML
 schema in the API response is updated on Eventor's side, there should be no changes to this file and it should be
-specified under Member -> parse_settings_file in [config.cfg]().
+specified under Member -> parse_settings_file in [config.cfg](sample_config.cfg).
 
 The members created using this service will be given a username which is their Eventor ID
 
@@ -165,7 +165,7 @@ service live, all members in the club can access contact information for all oth
 The user inventory endpoint is used for upgrading and downgrading members on the Wordpress site, if their member status
 is changed. First, ensure the configuration in section Registration above. Then, specify the users that should not be
 checked. For example, admin user and the API user itself in Wordpress -> Reserved users
-in [config.cfg](). The
+in [config.cfg](sample_config.cfg). The
 other users must have a username that equals an Eventor ID which is found in the membership list from Eventor. If a user
 is not found, it is degraded to the 'inactive' member type.
 
