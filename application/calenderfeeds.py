@@ -12,7 +12,7 @@ from icalendar.prop import vCategory, vText
 
 from application import eventor_utils
 from application.request_handler import api_request
-from common import check_api_key
+from common import check_api_key, KnownError
 from definitions import config, ROOT_DIR
 
 calendarfeeds_app = Blueprint('calendarfeeds', __name__)
@@ -43,12 +43,12 @@ def add_activities(root, calendar: Calendar):
 
             cal_event['categories'] = ','.join(['Eventor', 'Klubbaktivitet'])
 
-            cal_event['description'] = 'Denna aktivitet är importerad från Eventor, för info se: {}'.format(
-                attributes['url'])
+            cal_event['description'] = config['Messages']['eventor_import'] + ' ' + config['Messages'][
+                'original_ref'] + ' ' + attributes['url']
 
             cal_event['url'] = attributes['url']
 
-            cal_event['uid'] = 'Activity_' + attributes['id'] + '@eventor.orientering.se'
+            cal_event['uid'] = 'Activity_' + attributes['id'] + '@' + config['EventorApi']['base_url']
 
             calendar.add_component(cal_event)
         except RuntimeError as err:
@@ -101,12 +101,13 @@ def add_events(root, calendar: Calendar):
             classification = config['EventClassification'][str(event.find('EventClassificationId').text)]
             cal_event['categories'] = ','.join(['Eventor', classification])
 
-            url = 'https://eventor.orientering.se/Events/Show/' + event.find('EventId').text
+            url = config['EventorApi']['event_base_url'] + '/' + event.find('EventId').text
             cal_event['url'] = url
 
-            cal_event['description'] = 'Denna aktivitet är importerad från Eventor, för info se: {}'.format(url)
+            cal_event['description'] = config['Messages']['eventor_import'] + ' ' + config['Messages'][
+                'original_ref'] + ' ' + url
 
-            cal_event['uid'] = 'Event_' + event.find('EventId').text + '@eventor.orientering.se'
+            cal_event['uid'] = 'Event_' + event.find('EventId').text + '@' + config['EventorApi']['base_url']
 
             calendar.add_component(cal_event)
         except RuntimeError as err:
@@ -116,7 +117,7 @@ def add_events(root, calendar: Calendar):
 
 def add_idrottonline_feeds(calendar: Calendar):
     try:
-        with open('idrottonline_feeds.json', "r") as json_file:
+        with open(ROOT_DIR + '/idrottonline_feeds.json', "r") as json_file:
             data = json.load(json_file)
 
         for feed in data:
@@ -132,17 +133,19 @@ def add_idrottonline_feeds(calendar: Calendar):
                     component['categories'] = ','.join(feed_calendar['categories'])
 
                 idrottonline_id = vText.from_ical(component['UID']).split('Activity')[1].split('@')[0]
-                url = config['IdrottOnline'][
-                          'activity_base_url'] + '/' + calendar_name + '?calendarEventId=' + idrottonline_id
-                component['url'] = url
+
                 if 'description' in component:
                     description = vText.from_ical(component['description'])
                     description = description.replace('[', '<').replace(']', '>')
                 else:
                     description = ''
-                component[
-                    'description'] = description + 'Denna aktivitet är importerad från IdrottOnline, se: {}'.format(
-                    url)
+                component['description'] = description + config['Messages']['eventor_import']
+                if 'base_url' in feed and feed['base_url'] != '':
+                    url = feed['base_url'] + '/' + calendar_name + '?calendarEventId=' + idrottonline_id
+                    component['url'] = url
+                    component['description'] = component['description'] + ' ' + config['Messages'][
+                        'original_ref'] + ' ' + url
+
                 calendar.add_component(component)
     except IOError as e:
         logging.info(e)
@@ -153,7 +156,7 @@ def generate_calendarfeed(days_in_advance: int):
     logging.info('Trying to create calendar feed')
     calendar = Calendar()
     calendar['method'] = 'REQUEST'
-    calendar['prodid'] = '-//Svenska Orienteringsförbundet//GMOK'
+    calendar['prodid'] = '-//Svenska Orienteringsförbundet//' + config['General']['name']
     calendar['version'] = '2.0'
 
     start = date.today()
@@ -164,20 +167,21 @@ def generate_calendarfeed(days_in_advance: int):
     add_activities(activities_root, calendar)
 
     # Fetch district events
-
-    districs_events_root = eventor_utils.events(start, end, config['Calendar']['district_event_class_ids'].split(','),
-                                                [config['EventorApi']['district_id']])
-    add_events(districs_events_root, calendar)
+    if config['Calendar']['district_event_class_ids'].rstrip() != '':
+        districts_events_root = eventor_utils.events(start, end, config['Calendar']['district_event_class_ids'].split(','),
+                                                    [config['EventorApi']['district_id']])
+        add_events(districts_events_root, calendar)
 
     # Fetch club events
-    club_events_root = eventor_utils.events(start, end, config['Calendar']['club_event_class_ids'].split(','),
-                                            [config['EventorApi']['organisation_id']])
-    add_events(club_events_root, calendar)
+    if config['Calendar']['club_event_class_ids'].rstrip() != '':
+        club_events_root = eventor_utils.events(start, end, config['Calendar']['club_event_class_ids'].split(','),
+                                                [config['EventorApi']['organisation_id']])
+        add_events(club_events_root, calendar)
 
     # Add feeds from other webcals
     add_idrottonline_feeds(calendar)
 
-    f = open(config.get('Calendar', 'filename'), 'wb')
+    f = open(ROOT_DIR + '/' + config.get('Calendar', 'filename'), 'wb')
     f.write(calendar.to_ical())
     f.close()
     logging.info('Calendar feed created')
@@ -186,6 +190,8 @@ def generate_calendarfeed(days_in_advance: int):
 
 
 def overwrite_changed(calendar):
+    if config['Calendar']['target_feed'].rstrip() == '':
+        return
     target_feed = Calendar.from_ical(api_request('GET', config['Calendar']['target_feed'], '', '').text)
 
     target_dict = dict()
@@ -213,7 +219,7 @@ def fetch_calendarfeed():
         return response
     except IOError as e:
         logging.error(e)
-        raise Exception(config['Errors']['io_error'], 'eventor')
+        raise KnownError(config['Messages']['io_error'], 'eventor')
 
 
 @calendarfeeds_app.route('/calendarfeed', methods=['GET'])

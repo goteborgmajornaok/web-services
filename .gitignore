@@ -140,3 +140,7 @@ dmypy.json
 wsgi.py
 
 scratch.py
+/idrottonline_feeds.json
+/config.cfg
+/token.txt
+/logs/

@@ -5,14 +5,10 @@ from flask import Blueprint, request, flash, render_template, Markup
 
 from application.eventor_utils import validate_eventor_user
 from application.flask_forms import UserForm
+from common import KnownError
 from definitions import config
 
 create_user_app = Blueprint('wordpress_create_user', __name__)
-
-
-def create_message(first_name, last_name):
-    name = first_name + ' ' + last_name
-    return config['Messages']['created_user'].format(name)
 
 
 @create_user_app.route('/register', methods=['GET', 'POST'])
@@ -40,12 +36,16 @@ def register():
                                             eventor_profile['first_name'], eventor_profile['last_name'],
                                             eventor_profile['membership'])
 
-                message = create_message(eventor_profile['first_name'], eventor_profile['last_name'])
-
-                return render_template('register_success.html', message=message)
-            except Exception as e:
-                flash(Markup(e.args[0]), category=e.args[1])
+                return render_template('register_success.html', message=config['Messages']['user_created'],
+                                       login_url=config['Wordpress']['login_url'])
+            except KnownError as e:
+                flash(Markup(e.message), category=e.error_type)
     else:
         logging.info(f'Register GET request from {request.remote_addr}')
 
-    return render_template('register_form.html', form=form)
+    return render_template('register_form.html', form=form, organisation=config['General']['name'],
+                           site=config['Wordpress']['url'],
+                           eventor_forgot_password=config['EventorApi']['lost_password_url'],
+                           become_member_url=config['Wordpress']['become_member_url'].rstrip(),
+                           guest_member=config['Wordpress']['guest_member']
+                           )

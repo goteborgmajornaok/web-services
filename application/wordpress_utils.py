@@ -1,8 +1,10 @@
 import json
 import logging
+import os.path
 
 from application.request_handler import api_request
-from definitions import config, tmp_config, write_tmp
+from common import KnownError
+from definitions import config, ROOT_DIR
 
 
 def generate_token():
@@ -25,18 +27,22 @@ def validate_token(token):
 
 
 def get_token():
-    latest_token = tmp_config['WordpressApi']['token']
-    if not validate_token(latest_token):
-        new_token = generate_token()
-        tmp_config.set('WordpressApi', 'token', new_token)
-        write_tmp()
+    token_file = ROOT_DIR + '/' + config['Wordpress']['token_file']
+    token = None
+    if os.path.isfile(token_file):
+        with open(token_file) as f:
+            token = f.readline()
+    if token is None or not validate_token(token):
+        token = generate_token()
+        with open(token_file, 'w') as f:
+            f.write(token)
     else:
         logging.info('Reusing Wordpress token')
-    return tmp_config.get('WordpressApi', 'token')
+    return token
 
 
 def wordpress_request(method, api_endpoint, query_params=None, headers=None, success_codes=(200,)):
-    response = api_request(method, api_endpoint, config['Errors']['wp_fail'], 'wordpress', query_params, headers,
+    response = api_request(method, api_endpoint, config['Messages']['wp_fail'], 'wordpress', query_params, headers,
                            success_codes=success_codes).text
     return json.loads(response)
 
@@ -63,11 +69,11 @@ def check_existing_user(attr, value):
 def check_user(eventor_id, email):
     if not check_existing_user('username', eventor_id):
         logging.warning(f'Wordpress user with eventor id {eventor_id} already exists')
-        raise Exception(config['Errors']['already_registered'], 'wordpress')
+        raise KnownError(config['Messages']['already_registered'], 'wordpress')
 
     if not check_existing_user('email', email):
         logging.warning(f'Wordpress user with email {email} already exists')
-        raise Exception(config['Errors']['user_attr_exists'].format('email', email), 'wordpress')
+        raise KnownError(config['Messages']['user_attr_exists'], 'wordpress')
 
     logging.info(f'User with eventor id {eventor_id} not registered at Wordpress site')
 
