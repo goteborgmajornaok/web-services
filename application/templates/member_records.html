@@ -88,7 +88,7 @@
                 <br/>
                 {% for message in messages %}
                 <div class="alert alert-danger">
-                    {{ message }}
+                    {{ message | safe}}
                 </div>
 
                 {% endfor %}

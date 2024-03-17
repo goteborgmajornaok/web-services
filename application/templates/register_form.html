@@ -22,14 +22,14 @@
                 </h3>
                 <p>
                     Medlemmar och träningsmedlemmar i {{organisation}} kan här själva registrera en användare för
-                    {{site}} genom att ange inloggningsuppgifter till Eventor/Idrottonline (det är samma inloggning).
+                    {{site}} genom att ange inloggningsuppgifter till Eventor.
                     {% if become_member_url != '' %}
                     Om du ännu inte är medlem, men vill bli, gå till sidan <a href="{{become_member_url}}">Bli
                     medlem.</a>
                     {% endif %}
                 </p>
                 <p>
-                    I formuläret nedan anger du både inloggningsuppgifter till Eventor/IdrottOnline och samt email och
+                    I formuläret nedan anger du både inloggningsuppgifter till Eventor och samt email och
                     lösenord för din nya användare på {{site}}. Notera att det behövs en unik mailadress för varje
                     användare på {{site}}.
                 </p>
@@ -40,7 +40,7 @@
                     Personliga inställningar -> Organisationer, och bocka i {{organisation}}.
                 </p>
                 {% endif %}
-                <h5>1. Ange inloggningsuppgifter för Eventor/IdrottOnline</h5>
+                <h5>1. Ange inloggningsuppgifter för Eventor</h5>
                 <br/>
                 <div class="form-group row">
                     {{ form.eventor_user.label(class_="col-sm-2 col-form-label") }}
@@ -101,7 +101,7 @@
                 <br/>
                 {% for message in messages %}
                 <div class="alert alert-danger">
-                    {{ message }}
+                    {{ message | safe}}
                 </div>
 
                 {% endfor %}
@@ -186,7 +186,7 @@
             {% if messages %}
             {% for message in messages %}
             <div class="alert alert-danger">
-                {{ message }}
+                {{ message | safe}}
             </div>
 
             {% endfor %}
