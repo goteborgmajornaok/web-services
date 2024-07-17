@@ -27,6 +27,8 @@ try:
 
     CGIHandler().run(flaskapp)
 except (ModuleNotFoundError, ImportError) as e:
+    logging.error(e)
+    
     import subprocess
     import sys
 
